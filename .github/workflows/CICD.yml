@@ -49,7 +49,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to EC2 (blue/green)
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.AWS_EC2_IP }}
@@ -64,7 +64,7 @@ jobs:
 
             docker pull "$IMAGE"
 
-            if [ "$(docker ps -aq -f name=APP_NAME)" ]; then
+            if [ "$(docker ps -aq -f name=$APP_NAME)" ]; then
               echo "Stopping existing container: $APP_NAME"
               docker stop "$APP_NAME" || true
               docker rm "$APP_NAME" || true

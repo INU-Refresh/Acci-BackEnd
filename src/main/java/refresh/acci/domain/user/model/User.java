@@ -2,6 +2,7 @@ package refresh.acci.domain.user.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,4 +23,21 @@ public class User {
 
     @Column
     private String profileImage;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Builder
+    public User(String name, String email, String profileImage, Role role) {
+        this.name = name;
+        this.email = email;
+        this.profileImage = profileImage;
+        this.role = role;
+    }
+
+    public void update(String name, String profileImage) {
+        this.name = name;
+        this.profileImage = profileImage;
+    }
 }

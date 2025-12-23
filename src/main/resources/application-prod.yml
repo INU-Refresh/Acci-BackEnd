@@ -77,8 +77,8 @@ spring:
 # JWT 설정
 jwt:
   key: ${JWT_SECRET_KEY}
-  access-token-validity-in-milliseconds: 1800000    # 30분
-  refresh-token-validity-in-milliseconds: 604800000  # 7일
+  access-token-validity-in-milliseconds: 15552000000  #6개월
+  refresh-token-validity-in-milliseconds: 31104000000 #1년
 
 # 애플리케이션 설정
 app:

@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
+import refresh.acci.domain.analysis.model.enums.AccidentStatus;
+import refresh.acci.domain.analysis.model.enums.AccidentType;
 
 import java.util.UUID;
 
@@ -20,27 +22,41 @@ public class Analysis {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(name = "accident_rate")
     private Long accidentRate;
 
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(name = "accident_type")
     private AccidentType accidentType;
 
-    @Column
-    private String accidentImage;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "accident_status")
+    private AccidentStatus accidentStatus;
 
-    private Analysis(Long userId, Long accidentRate, AccidentType accidentType, String accidentImage) {
+    @Column(name = "is_completed", nullable = false)
+    private boolean isCompleted = false;
+
+    private Analysis(Long userId, AccidentStatus accidentStatus) {
         this.userId = userId;
-        this.accidentRate = accidentRate;
-        this.accidentType = accidentType;
-        this.accidentImage = accidentImage;
+        this.accidentStatus = accidentStatus;
     }
 
-    public static Analysis of(Long userId, Long accidentRate, AccidentType accidentType, String accidentImage) {
-        return new Analysis(userId, accidentRate, accidentType, accidentImage);
+    public static Analysis of(Long userId) {
+        return new Analysis(userId, AccidentStatus.PROCESSING);
+    }
+
+    public void completeAnalysis(Long accidentRate, AccidentType accidentType) {
+        this.accidentRate = accidentRate;
+        this.accidentType = accidentType;
+        this.accidentStatus = AccidentStatus.COMPLETED;
+        this.isCompleted = true;
+    }
+
+    public void failAnalysis() {
+        this.accidentStatus = AccidentStatus.FAILED;
+        this.isCompleted = true;
     }
 }

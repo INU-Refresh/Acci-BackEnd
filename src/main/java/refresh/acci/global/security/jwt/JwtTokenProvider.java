@@ -71,7 +71,7 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
-    //토큰 유효성 검사 (추후 CustomException으로 변경)
+    //토큰 유효성 검사
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -80,23 +80,16 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
+            log.warn("잘못된 JWT 서명입니다: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 서명입니다.");
+            log.warn("만료된 JWT 토큰입니다: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT Token입니다.");
+            log.warn("지원되지 않는 JWT 토큰입니다: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
+            log.warn("JWT 토큰이 잘못되었습니다: {}", e.getMessage());
         }
         return false;
     }
-
-    //Token에서 사용자 Email 추출
-    public String getUserEmailFromToken(String token) {
-        Claims claims = parseClaims(token);
-        return claims.getSubject();
-    }
-
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(key.getBytes());

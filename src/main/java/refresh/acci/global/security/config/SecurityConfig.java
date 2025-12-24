@@ -1,6 +1,5 @@
 package refresh.acci.global.security.config;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +17,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import refresh.acci.domain.auth.handler.OAuthFailureHandler;
 import refresh.acci.domain.auth.handler.OAuthSuccessHandler;
 import refresh.acci.domain.auth.oauth.CustomOAuth2UserService;
+import refresh.acci.global.security.jwt.JwtAccessDeniedHandler;
+import refresh.acci.global.security.jwt.JwtAuthenticationEntryPoint;
 import refresh.acci.global.security.jwt.JwtAuthorizationFilter;
-
 
 import java.util.Arrays;
 
@@ -32,6 +32,8 @@ public class SecurityConfig {
     private final OAuthFailureHandler oauthFailureHandler;
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -68,9 +70,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/oauth2/**").permitAll()
-                        .requestMatchers("/api/v1/auth/oauth2/callback/**").permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(AUTHENTICATED_ENDPOINTS).authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -80,11 +81,24 @@ public class SecurityConfig {
                         .failureHandler(oauthFailureHandler)
                 )
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                        })
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
                 )
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
+
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/oauth2/**",
+            "/api/v1/auth/oauth2/callback/**",
+            "/api/v1/auth/refresh"
+    };
+
+    private static final String[] AUTHENTICATED_ENDPOINTS = {
+            "/api/v1/auth/logout",
+            "/api/v1/users/**"
+    };
 }

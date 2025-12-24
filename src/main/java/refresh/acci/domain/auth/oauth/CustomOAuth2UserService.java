@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.user.infra.UserRepository;
 import refresh.acci.domain.user.model.CustomOAuthUser;
+import refresh.acci.domain.user.model.Provider;
 import refresh.acci.domain.user.model.User;
 import refresh.acci.global.security.oauth.OAuthResponseFactory;
 import refresh.acci.global.security.oauth.attributes.OAuthAttributes;
@@ -42,21 +43,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User saveOrUpdate(OAuthAttributes attributes) {
-        User user = userRepository.findByEmail(attributes.getEmail())
+        Provider provider = Provider.from(attributes.getProvider());
+
+        User user = userRepository.findByProviderAndProviderId(
+                        provider,
+                        attributes.getProviderId()
+                )
                 .map(existingUser -> updateUser(existingUser, attributes))
                 .orElseGet(() -> createUser(attributes));
+
         return userRepository.save(user);
     }
 
     private User updateUser(User user, OAuthAttributes attributes) {
         user.update(attributes.getName(), attributes.getProfileImage());
-        log.info("유저 정보 업데이트: {}", user.getEmail());
+        log.info("유저 정보 업데이트: {}", user.getProviderId());
         return userRepository.save(user);
     }
 
     private User createUser(OAuthAttributes attributes) {
         User user = attributes.toEntity();
-        log.info("신규 유저 생성: {}", user.getEmail());
+        log.info("신규 유저 생성: {}", user.getProviderId());
         return user;
     }
 

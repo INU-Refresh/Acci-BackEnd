@@ -7,7 +7,7 @@ import refresh.acci.global.security.oauth.attributes.OAuthAttributes;
 import java.util.Map;
 
 @Component
-public class KakaoOAuthResponseStrategy implements OAuthResponseStrategy{
+public class KakaoOAuthResponseStrategy implements OAuthResponseStrategy {
 
     @Override
     public String getProviderName() {

@@ -20,21 +20,21 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 200MB
-      max-request-size: 200MB
+      max-file-size: 100MB
+      max-request-size: 100MB
 
-  security:
-    oauth2:
-      client:
-        registration:
-          # Google OAuth2
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope:
-              - email
-              - profile
-            redirect-uri: "${BACKEND_URL}/api/v1/auth/oauth2/callback/{registrationId}"
+security:
+  oauth2:
+    client:
+      registration:
+        # Google OAuth2
+        google:
+          client-id: ${GOOGLE_CLIENT_ID}
+          client-secret: ${GOOGLE_CLIENT_SECRET}
+          scope:
+            - email
+            - profile
+          redirect-uri: "${BACKEND_URL}/api/v1/auth/oauth2/callback/{registrationId}"
 
           # Kakao OAuth2
           kakao:
@@ -89,6 +89,10 @@ app:
 
 server:
   port: 8080
+
+ai:
+  server:
+    url: ${AI_SERVER_URL}
 
 logging:
   file:

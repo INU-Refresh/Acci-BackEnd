@@ -86,6 +86,7 @@ jobs:
               -e "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" \
               -e "BACKEND_URL=${{ secrets.BACKEND_URL }}" \
               -e "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" \
+              -e "AI_SERVER_URL"="${{ secrets.AI_SERVER_URL }}" \
               -p "8080:8080" \
               "$IMAGE"
 

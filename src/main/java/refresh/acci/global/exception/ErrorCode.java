@@ -27,7 +27,15 @@ public enum ErrorCode {
     DUPLICATE_OAUTH_PROVIDER(HttpStatus.INTERNAL_SERVER_ERROR, 500, "중복된 OAuth 제공자가 등록되어 있습니다."),
 
     // Validation
-    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, 400, "요청한 값이 올바르지 않습니다.");
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, 400, "요청한 값이 올바르지 않습니다."),
+
+    // Analysis
+    ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "분석을 찾을 수 없습니다."),
+    AI_SERVER_COMMUNICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "AI 서버와의 통신에 실패했습니다."),
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "파일 업로드에 실패했습니다."),
+    UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 파일 형식입니다.")
+
+    ;
 
     private final HttpStatus httpStatus;
     private final Integer code;

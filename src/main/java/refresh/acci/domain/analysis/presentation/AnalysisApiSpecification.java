@@ -25,28 +25,14 @@ public interface AnalysisApiSpecification {
     @Operation(
             summary = "영상 분석 업로드",
             description = "교통사고 영상을 업로드하여 AI 서버에 전송합니다. 업로드 후 분석 ID를 반환합니다. <br><br>" +
-                    "분석 ID를 사용하여 분석 결과를 조회하거나 SSE 구독을 할 수 있습니다.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "영상 분석 업로드 성공",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = AnalysisUploadResponse.class)))
-    })
-    ResponseEntity<AnalysisUploadResponse> analyze(@RequestPart("video") MultipartFile file,
-                                                   @AuthenticationPrincipal CustomUserDetails userDetails);
-
-    @Operation(
-            summary = "[SSE 구독] 영상 분석 상태 조회",
-            description = "영상 분석 진행 상태를 SSE(Server-Sent Events)로 구독합니다. <br><br>" +
-                    "클라이언트는 이 엔드포인트에 연결하여 실시간으로 분석 상태 업데이트를 받을 수 있습니다. <br><br>" +
+                    "분석 ID를 사용하여 분석 결과를 조회하거나 SSE 구독을 할 수 있습니다. <br><br>" +
                     "파일 확장자가 .mp4, .avi 중 하나가 아닐 경우 에러를 발생시킵니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
-                            description = "SSE 구독 성공",
+                            responseCode = "202",
+                            description = "영상 분석 업로드 성공",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SseEmitter.class))),
+                                    schema = @Schema(implementation = AnalysisUploadResponse.class))),
                     @ApiResponse(
                             responseCode = "400",
                             description = "지원하지 않는 파일 형식입니다.",
@@ -60,6 +46,20 @@ public interface AnalysisApiSpecification {
                                          "errors": null
                                       }
                                       """)))
+    })
+    ResponseEntity<AnalysisUploadResponse> analyze(@RequestPart("video") MultipartFile file,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails);
+
+    @Operation(
+            summary = "[SSE 구독] 영상 분석 상태 조회",
+            description = "영상 분석 진행 상태를 SSE(Server-Sent Events)로 구독합니다. <br><br>" +
+                    "클라이언트는 이 엔드포인트에 연결하여 실시간으로 분석 상태 업데이트를 받을 수 있습니다. <br><br>",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "SSE 구독 성공",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = SseEmitter.class)))
     })
     SseEmitter subscribe(@PathVariable UUID analysisId);
 

@@ -11,9 +11,14 @@ import refresh.acci.domain.analysis.model.Analysis;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisResultResponse;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisUploadResponse;
 import refresh.acci.domain.user.model.CustomUserDetails;
+import refresh.acci.global.exception.CustomException;
+import refresh.acci.global.exception.ErrorCode;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 @Slf4j
 @Service
@@ -25,14 +30,33 @@ public class AnalysisService {
     private final LoadingTipsProvider loadingTipsProvider;
     private final AnalysisQueryService analysisQueryService;
     private final AnalysisCommandService analysisCommandService;
+    private final AnalysisSseService analysisSseService;
+    private final Executor analysisExecutor;
 
     @Transactional
     public AnalysisUploadResponse anaylze(MultipartFile video, CustomUserDetails userDetails) {
+        if (video == null || video.isEmpty()) throw new CustomException(ErrorCode.VIDEO_FILE_MISSING);
+
         Analysis analysis = analysisCommandService.saveAndFlushNewAnalysis(Analysis.of(userDetails.getId()));
 
         // 임시 파일로 저장 후 비동기 분석 작업 실행
         Path tempFilePath = tempVideoStore.saveToTempFile(video, analysis.getId());
-        analysisWorkerService.runAnalysis(analysis.getId(), tempFilePath);
+
+        // 비동기 분석 작업 실행
+        try {
+            analysisExecutor.execute(() -> analysisWorkerService.runAnalysis(analysis.getId(), tempFilePath));
+        } catch (RejectedExecutionException e) {
+            // 거절 처리: 상태 FAILED, SSE 전송, 파일 삭제
+            Analysis failedAnalysis = analysisCommandService.fail(analysis.getId());
+            analysisSseService.send(failedAnalysis.getId(), "status",
+                    Map.of("analysisId", failedAnalysis.getId(),
+                           "status", failedAnalysis.getAnalysisStatus(),
+                           "isCompleted", failedAnalysis.isCompleted()));
+            tempVideoStore.deleteFile(tempFilePath);
+
+            log.error("분석 작업이 너무 많아 요청이 거절되었습니다. 분석 ID: {}", failedAnalysis.getId());
+            throw new CustomException(ErrorCode.TOO_MANY_ANALYSIS_REQUESTS);
+        }
 
         return AnalysisUploadResponse.of(analysis);
     }

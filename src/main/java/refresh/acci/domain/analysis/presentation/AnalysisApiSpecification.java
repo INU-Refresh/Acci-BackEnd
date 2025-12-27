@@ -29,7 +29,7 @@ public interface AnalysisApiSpecification {
                     "파일 확장자가 .mp4, .avi 중 하나가 아닐 경우 에러를 발생시킵니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "202",
                             description = "영상 분석 업로드 성공",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = AnalysisUploadResponse.class))),

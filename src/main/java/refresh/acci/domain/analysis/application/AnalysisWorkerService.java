@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import refresh.acci.domain.analysis.infra.file.TempVideoStore;
 import refresh.acci.domain.analysis.model.Analysis;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisResultResponse;
@@ -28,42 +27,45 @@ import java.util.UUID;
 public class AnalysisWorkerService {
 
     private final AnalysisSseService sseService;
-    private final AnalysisQueryService analysisQueryService;
+    private final AnalysisCommandService analysisCommandService;
     private final WebClient.Builder webClientBuilder;
     private final TempVideoStore tempVideoStore;
 
     @Value("${ai.server.url}")
     private String aiServerUrl;
 
-    @Async("analysisExecutor")
-    @Transactional
     public void runAnalysis(UUID analysisId, Path tempFilePath) {
         try {
             // AI 서버에 영상 파일 전송 및 분석 결과 수신
             AnalysisResultResponse response = callAi(tempFilePath);
 
             // 분석 결과로 Analysis 엔티티 업데이트
-            Analysis analysis = analysisQueryService.getAnalysis(analysisId);
-            analysis.completeAnalysis(response.accidentRate(), response.accidentType());
+            Analysis analysis = analysisCommandService.completeAndGetAnalysis(analysisId, response);
 
             // SSE로 분석 성공 알림 전송
-            sseService.send(analysisId, "status", Map.of(
+            sseService.send(analysisId, "status",
+                    Map.of(
                     "analysisId", analysis.getId(),
                     "status", analysis.getAnalysisStatus(),
                     "isCompleted", analysis.isCompleted()
             ));
         } catch (Exception e) {
             log.warn("분석 작업 중 오류 발생: {}", e.getMessage());
-            // 분석 실패 처리
-            Analysis analysis = analysisQueryService.getAnalysis(analysisId);
-            analysis.failAnalysis();
 
-            // SSE로 분석 실패 알림 전송
-            sseService.send(analysisId, "status", Map.of(
-                    "analysisId", analysis.getId(),
-                    "status", analysis.getAnalysisStatus(),
-                    "isCompleted", analysis.isCompleted()
-            ));
+            try {
+                // 분석 실패 처리
+                Analysis analysis = analysisCommandService.fail(analysisId);
+
+                // SSE로 분석 실패 알림 전송
+                sseService.send(analysisId, "status",
+                        Map.of(
+                        "analysisId", analysis.getId(),
+                        "status", analysis.getAnalysisStatus(),
+                        "isCompleted", analysis.isCompleted()
+                ));
+            } catch (Exception ex) {
+                log.warn("분석 실패 처리 중 오류 발생: {}", ex.getMessage());
+            }
         } finally {
             // 임시 파일 삭제
             try {
@@ -90,9 +92,9 @@ public class AnalysisWorkerService {
                 .retrieve() // 응답을 받아옴
                 .onStatus(s -> s.is4xxClientError() || s.is5xxServerError(), // retrieve()는 4xx/5xx에서 예외 발생
                         response -> response.bodyToMono(String.class)
-                                .map(body -> {
+                                .flatMap(body -> {
                                     log.warn("AI 서버와의 통신 중 오류 발생: {}", body);
-                                    return new CustomException(ErrorCode.AI_SERVER_COMMUNICATION_FAILED);
+                                    return Mono.error(new CustomException(ErrorCode.AI_SERVER_COMMUNICATION_FAILED));
                                 })) // 오류 상태 처리
                 .bodyToMono(AnalysisResultResponse.class) // 응답 바디를 AnalysisUploadResponse 객체로 변환
                 .timeout(Duration.ofMinutes(5)) // 타임아웃 5분

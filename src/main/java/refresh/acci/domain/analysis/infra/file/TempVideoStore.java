@@ -1,5 +1,6 @@
 package refresh.acci.domain.analysis.infra.file;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import refresh.acci.global.exception.CustomException;
@@ -10,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class TempVideoStore {
 
@@ -26,15 +28,13 @@ public class TempVideoStore {
             }
 
             // OS 임시 디렉토리에 임시 파일 생성
-            Path tempFilePath = Files.createTempFile("analysis-" + analysisId + "-", extension);
+            Path tempFilePath = Files.createTempFile("analysis-" + analysisId + "-", "." + extension);
 
             // 임시 파일 경로에 파일 복사, 존재 시 덮어씀 (try-with-resources)
             try (var fileInputStream = video.getInputStream()) {
                 Files.copy(fileInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
             }
             return tempFilePath;
-        } catch (CustomException e) {
-            throw e;
         } catch (Exception e) {
             throw new CustomException(ErrorCode.FILE_UPLOAD_FAILED);
         }
@@ -42,14 +42,19 @@ public class TempVideoStore {
 
     // 임시 파일 삭제
     public void deleteFile(Path path) {
-        try { Files.deleteIfExists(path); } catch (Exception ignore) {}
+        if (path == null) return;
+        try {
+            Files.deleteIfExists(path);
+        } catch (Exception e) {
+            log.warn("임시 파일 삭제 실패: {} {}", path, e.getMessage());
+        }
     }
 
     // 확장자 추출
     private String getFileExtension(String filename) {
         if (filename == null) return "";
         int lastDotIndex = filename.lastIndexOf('.');
-        if (lastDotIndex < 0) return "";
-        return filename.substring(lastDotIndex).toLowerCase();
+        if (lastDotIndex < 0 || lastDotIndex == filename.length() -1) return "";
+        return filename.substring(lastDotIndex + 1).toLowerCase();
     }
 }

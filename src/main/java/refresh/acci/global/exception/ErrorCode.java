@@ -25,8 +25,9 @@ public enum ErrorCode {
     ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "분석을 찾을 수 없습니다."),
     AI_SERVER_COMMUNICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "AI 서버와의 통신에 실패했습니다."),
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "파일 업로드에 실패했습니다."),
-    UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 파일 형식입니다.")
-
+    UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 파일 형식입니다."),
+    TOO_MANY_ANALYSIS_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, 429, "분석 요청이 너무 많습니다. 잠시 후 다시 시도해주세요."),
+    VIDEO_FILE_MISSING(HttpStatus.BAD_REQUEST, 400, "업로드할 비디오 파일이 없습니다.")
     ;
 
     private final HttpStatus httpStatus;

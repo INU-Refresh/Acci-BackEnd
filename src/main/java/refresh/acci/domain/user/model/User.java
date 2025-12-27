@@ -9,16 +9,28 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user")
+@Table(
+        name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"provider", "provider_id"})
+        }
+)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Provider provider;
+
+    @Column(nullable = false)
+    private String providerId;
+
     @Column(name = "user_name", nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column
@@ -29,7 +41,9 @@ public class User {
     private Role role;
 
     @Builder
-    public User(String name, String email, String profileImage, Role role) {
+    public User(String provider, String providerId, String name, String email, String profileImage, Role role) {
+        this.provider = Provider.from(provider);
+        this.providerId = providerId;
         this.name = name;
         this.email = email;
         this.profileImage = profileImage;

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import refresh.acci.global.security.jwt.JwtTokenProvider;
 import refresh.acci.global.security.jwt.TokenDto;
-import refresh.acci.global.security.util.CookieUtil;
+import refresh.acci.global.util.CookieUtil;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         //Refresh Token Cookie에 저장
         int maxAge = (int) (refreshTokenValidityInMilliseconds / 1000);
-        CookieUtil.addRefreshCookie(response, tokenDto.getRefreshToken(), maxAge);
+        CookieUtil.addRefreshTokenCookie(response, tokenDto.getRefreshToken(), maxAge);
 
         //AccessToken을 쿼리 파라미터로 FE에 전달
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)

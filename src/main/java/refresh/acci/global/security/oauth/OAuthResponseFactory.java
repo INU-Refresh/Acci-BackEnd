@@ -2,6 +2,8 @@ package refresh.acci.global.security.oauth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import refresh.acci.global.exception.CustomException;
+import refresh.acci.global.exception.ErrorCode;
 import refresh.acci.global.security.oauth.attributes.OAuthAttributes;
 import refresh.acci.global.security.oauth.strategy.OAuthResponseStrategy;
 
@@ -23,7 +25,7 @@ public class OAuthResponseFactory {
                         OAuthResponseStrategy::getProviderName,
                         Function.identity(),
                         (existing, replacement) -> {
-                            throw new IllegalStateException("Duplicate OAuth provider: " + existing.getProviderName());
+                            throw new CustomException(ErrorCode.DUPLICATE_OAUTH_PROVIDER);
                         }
                 ));
         log.info("OAuth 제공자: {}", strategies.keySet());
@@ -33,7 +35,7 @@ public class OAuthResponseFactory {
     public OAuthAttributes createOAuthAttributes(String provider, Map<String, Object> attributes) {
         OAuthResponseStrategy strategy = strategies.get(provider.toLowerCase());
         if (strategy == null) {
-            throw new IllegalArgumentException("지원하지 않는 OAuth 제공자: " + provider);
+            throw new CustomException(ErrorCode.UNSUPPORTED_OAUTH_PROVIDER);
         }
         return strategy.createOAuthAttributes(attributes);
     }

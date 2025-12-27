@@ -2,9 +2,9 @@ package refresh.acci.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -21,12 +21,6 @@ public class GlobalExceptionHandler {
         return ErrorResponseEntity.toResponseEntity(ex.getErrorCode());
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponseEntity> handleAuthenticationException(AuthenticationException ex) {
-        ErrorCode errorCode = ErrorCode.JWT_ENTRY_POINT;
-        return ErrorResponseEntity.toResponseEntity(errorCode);
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseEntity> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException ex) {
@@ -40,9 +34,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<ErrorResponseEntity> handleMissingPart(MissingServletRequestPartException ex) {
         ErrorCode errorCode = ErrorCode.MISSING_PART;
-
         String message = "요청에 필요한 부분이 없습니다: " + ex.getRequestPartName();
+        return ErrorResponseEntity.toResponseEntity(errorCode, message, null);
+    }
 
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ErrorResponseEntity> handleMissingCookie(MissingRequestCookieException ex) {
+        ErrorCode errorCode = ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+        String message = "필수 쿠키가 누락되었습니다: " + ex.getCookieName();
         return ErrorResponseEntity.toResponseEntity(errorCode, message, null);
     }
 

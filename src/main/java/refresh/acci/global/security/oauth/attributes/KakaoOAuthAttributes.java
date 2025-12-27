@@ -10,6 +10,8 @@ import java.util.Map;
 @Getter
 @Builder
 public class KakaoOAuthAttributes implements OAuthAttributes {
+    private String provider;
+    private String providerId;
     private String name;
     private String email;
     private String profileImage;
@@ -19,15 +21,19 @@ public class KakaoOAuthAttributes implements OAuthAttributes {
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
 
         return KakaoOAuthAttributes.builder()
-                .name((String) profile.get("name"))
+                .provider("kakao")
+                .providerId(String.valueOf(attributes.get("id")))
+                .name((String) profile.get("nickname"))
                 .email((String) profile.get("email"))
-                .profileImage((String) profile.get("profile_image"))
+                .profileImage((String) profile.get("profile_image_url"))
                 .build();
     }
 
     @Override
     public User toEntity() {
         return User.builder()
+                .provider(provider)
+                .providerId(providerId)
                 .name(name)
                 .email(email)
                 .profileImage(profileImage)

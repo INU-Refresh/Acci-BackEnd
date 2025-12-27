@@ -1,4 +1,4 @@
-package refresh.acci.domain.user.service;
+package refresh.acci.domain.user.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.user.infra.UserRepository;
 import refresh.acci.domain.user.model.CustomUserDetails;
 import refresh.acci.domain.user.model.User;
+import refresh.acci.global.exception.CustomException;
+import refresh.acci.global.exception.ErrorCode;
 
 @Slf4j
 @Service
@@ -19,9 +21,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(email));
+    public UserDetails loadUserByUsername(String providerId) throws UsernameNotFoundException {
+        User user = userRepository.findByProviderId(providerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         return new CustomUserDetails(user);
     }
 }

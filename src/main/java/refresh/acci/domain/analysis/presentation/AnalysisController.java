@@ -38,7 +38,7 @@ public class AnalysisController implements AnalysisApiSpecification{
     }
 
     // 랜덤 Tip 제공
-    @GetMapping("/loading")
+    @GetMapping(value = "/loading", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> getLoadingTips() {
         return ResponseEntity.status(HttpStatus.OK).body(analysisService.getLoadingTips());
     }

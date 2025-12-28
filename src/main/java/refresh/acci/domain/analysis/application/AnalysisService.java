@@ -37,7 +37,10 @@ public class AnalysisService {
     public AnalysisUploadResponse anaylze(MultipartFile video, CustomUserDetails userDetails) {
         if (video == null || video.isEmpty()) throw new CustomException(ErrorCode.VIDEO_FILE_MISSING);
 
-        Analysis analysis = analysisCommandService.saveAndFlushNewAnalysis(Analysis.of(userDetails.getId()));
+        Long userId = null;
+        if (userDetails != null) userId = userDetails.getId();
+
+        Analysis analysis = analysisCommandService.saveAndFlushNewAnalysis(Analysis.of(userId));
 
         // 임시 파일로 저장 후 비동기 분석 작업 실행
         Path tempFilePath = tempVideoStore.saveToTempFile(video, analysis.getId());

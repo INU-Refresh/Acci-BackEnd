@@ -1,4 +1,4 @@
-package refresh.acci.domain.auth.handler;
+package refresh.acci.domain.auth.application.handler;
 
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,11 +10,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import refresh.acci.domain.auth.infra.AuthCodeRepository;
+import refresh.acci.domain.auth.model.AuthCode;
 import refresh.acci.global.security.jwt.JwtTokenProvider;
 import refresh.acci.global.security.jwt.TokenDto;
 import refresh.acci.global.util.CookieUtil;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -22,6 +25,7 @@ import java.io.IOException;
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthCodeRepository authCodeRepository;
 
     @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
@@ -37,9 +41,15 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         int maxAge = (int) (refreshTokenValidityInMilliseconds / 1000);
         CookieUtil.addRefreshTokenCookie(response, tokenDto.getRefreshToken(), maxAge);
 
-        //AccessToken을 쿼리 파라미터로 FE에 전달
+        //AuthCode 생성
+        String code = UUID.randomUUID().toString();
+        AuthCode authCode = AuthCode.of(code, tokenDto.getAccessToken());
+        authCodeRepository.save(authCode);
+        log.info("인증 코드 발급: {} (유효시간: 30초)", code.substring(0, 8) + "...");
+
+        //AuthCode를 쿼리 파라미터로 FE에 전달
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("accessToken", tokenDto.getAccessToken())
+                .queryParam("code", code)
                 .build()
                 .toUriString();
 

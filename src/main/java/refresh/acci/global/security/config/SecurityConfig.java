@@ -15,8 +15,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import refresh.acci.domain.auth.handler.OAuthFailureHandler;
-import refresh.acci.domain.auth.handler.OAuthSuccessHandler;
+import refresh.acci.domain.auth.application.handler.OAuthFailureHandler;
+import refresh.acci.domain.auth.application.handler.OAuthSuccessHandler;
 import refresh.acci.domain.auth.oauth.CustomOAuth2UserService;
 import refresh.acci.global.security.jwt.JwtAccessDeniedHandler;
 import refresh.acci.global.security.jwt.JwtAuthenticationEntryPoint;

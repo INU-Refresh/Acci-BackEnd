@@ -19,6 +19,7 @@ public enum ErrorCode {
     JWT_ACCESS_DENIED(HttpStatus.FORBIDDEN, 403, "리소스에 접근할 권한이 없습니다."),
     USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "인증된 사용자 정보를 찾을 수 없습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, 401, "유효하지 않은 토큰입니다."),
+    INVALID_AUTH_CODE(HttpStatus.UNAUTHORIZED, 401, "유효하지 않거나 만료된 인증 코드입니다."),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "리프레시 토큰이 존재하지 않습니다."),
 
     //OAuth

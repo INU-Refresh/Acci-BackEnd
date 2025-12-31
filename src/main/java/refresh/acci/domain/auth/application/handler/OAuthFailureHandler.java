@@ -1,4 +1,4 @@
-package refresh.acci.domain.auth.handler;
+package refresh.acci.domain.auth.application.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

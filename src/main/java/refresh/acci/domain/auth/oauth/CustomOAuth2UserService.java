@@ -45,7 +45,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private User saveOrUpdate(OAuthAttributes attributes) {
         Provider provider = Provider.from(attributes.getProvider());
 
-        User user = userRepository.findByProviderAndProviderId(provider, attributes.getProviderId())
+        User user = userRepository.findByProviderAndProviderIdAndDeletedFalse(provider, attributes.getProviderId())
                 .map(existingUser -> updateUser(existingUser, attributes))
                 .orElseGet(() -> createUser(attributes));
 

@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import refresh.acci.global.common.SoftDelete;
 
 @Entity
 @Getter
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
                 @UniqueConstraint(columnNames = {"provider", "provider_id"})
         }
 )
-public class User {
+public class User extends SoftDelete {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 import refresh.acci.domain.analysis.model.enums.AnalysisStatus;
 import refresh.acci.domain.analysis.model.enums.AccidentType;
+import refresh.acci.global.common.BaseTime;
 
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "analysis")
-public class Analysis {
+public class Analysis extends BaseTime {
 
     @Id
     @GeneratedValue

@@ -11,4 +11,8 @@ public interface AuthCodeRepository {
     Optional<AuthCode> findByCode(String code);
 
     void deleteByCode(String code);
+
+    void removeExpiredCodes();
+
+    int size();
 }

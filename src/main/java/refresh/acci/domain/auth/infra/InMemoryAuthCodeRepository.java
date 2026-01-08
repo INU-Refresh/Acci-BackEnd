@@ -41,14 +41,15 @@ public class InMemoryAuthCodeRepository implements AuthCodeRepository {
         storage.remove(code);
     }
 
-    @Scheduled(fixedRate = 60000)
-    public void cleanupExpiredCodes() {
-        int beforeSize = storage.size();
+    @Override
+    public void removeExpiredCodes() {
         storage.entrySet().removeIf(entry -> entry.getValue().isExpired());
-        int afterSize = storage.size();
-
-        if (beforeSize != afterSize) {
-            log.info("만료된 인증 코드 {}개 정리 완료", beforeSize - afterSize);
-        }
     }
+
+    @Override
+    public int size() {
+        return storage.size();
+    }
+
+
 }

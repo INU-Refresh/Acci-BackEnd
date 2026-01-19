@@ -17,6 +17,7 @@ import refresh.acci.global.security.jwt.TokenDto;
 import refresh.acci.global.util.CookieUtil;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -33,6 +34,13 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Value("${jwt.refresh-token-validity-in-milliseconds}")
     private long refreshTokenValidityInMilliseconds;
 
+    //Redirect Uri White List
+    private static final List<String> ALLOWED_REDIRECT_URIS = List.of(
+            "https://acci-ai.vercel.app/oauth2/redirect",
+            "http://localhost:3000/oauth2/redirect",
+            "http://localhost:5173/oauth2/redirect"
+    );
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException{
         TokenDto tokenDto = jwtTokenProvider.generateTokenDto(authentication);
@@ -47,13 +55,41 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         authCodeRepository.save(authCode);
         log.info("인증 코드 발급: {} (유효시간: 30초)", code.substring(0, 8) + "...");
 
+        //local 개발을 위한 redirect_url
+        String frontendRedirectUrl = determineFrontendRedirectUri(request);
+
         //AuthCode를 쿼리 파라미터로 FE에 전달
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
+        String targetUrl = UriComponentsBuilder.fromUriString(frontendRedirectUrl)
                 .queryParam("code", code)
                 .build()
                 .toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    //Referer 헤더 기반으로 프런트 Redirect Uri 분기
+    private String determineFrontendRedirectUri(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        if (referer != null) {
+            if (referer.startsWith("http://localhost:3000")) {
+                return validateAndReturn("http://localhost:3000/oauth2/redirect");
+            }
+            if (referer.startsWith("http://localhost:5173")) {
+                return validateAndReturn("http://localhost:5173/oauth2/redirect");
+            }
+            if (referer.contains("acci-ai.vercel.app")) {
+                return validateAndReturn("https://acci-ai.vercel.app/oauth2/redirect");
+            }
+        }
+        return redirectUri;
+    }
+
+    private String validateAndReturn(String uri) {
+        if (ALLOWED_REDIRECT_URIS.contains(uri)) {
+            return uri;
+        }
+        log.warn("허용되지 않은 redirect URI 시도: {}", uri);
+        return redirectUri;
     }
 }
 

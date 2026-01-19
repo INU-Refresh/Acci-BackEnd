@@ -28,11 +28,11 @@ public class TokenResponse {
     }
 
     //AuthCode 교환용
-    public static TokenResponse from(String accessToken) {
+    public static TokenResponse from(String accessToken, Long accessTokenExpiresIn) {
         return TokenResponse.builder()
                 .grantType("Bearer")
                 .accessToken(accessToken)
-                .accessTokenExpiresIn(null)
+                .accessTokenExpiresIn(accessTokenExpiresIn)
                 .build();
     }
 }

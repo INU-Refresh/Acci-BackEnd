@@ -43,7 +43,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         //AuthCode 생성
         String code = UUID.randomUUID().toString();
-        AuthCode authCode = AuthCode.of(code, tokenDto.getAccessToken());
+        AuthCode authCode = AuthCode.of(code, tokenDto.getAccessToken(), tokenDto.getAccessTokenExpiresIn());
         authCodeRepository.save(authCode);
         log.info("인증 코드 발급: {} (유효시간: 30초)", code.substring(0, 8) + "...");
 

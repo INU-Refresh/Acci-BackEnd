@@ -11,16 +11,18 @@ public class AuthCode {
 
     private final String code;
     private final String accessToken;
+    private final Long accessTokenExpiresIn;
     private final LocalDateTime expiresAt;
 
-    public AuthCode(String code, String accessToken, int validitySeconds) {
+    public AuthCode(String code, String accessToken, Long accessTokenExpiresIn, int validitySeconds) {
         this.code = code;
         this.accessToken = accessToken;
+        this.accessTokenExpiresIn = accessTokenExpiresIn;
         this.expiresAt = LocalDateTime.now().plusSeconds(validitySeconds);
     }
 
-    public static AuthCode of(String code, String accessToken) {
-        return new AuthCode(code, accessToken, DEFAULT_VALIDITY_SECONDS);
+    public static AuthCode of(String code, String accessToken, Long accessTokenExpiresIn) {
+        return new AuthCode(code, accessToken, accessTokenExpiresIn, DEFAULT_VALIDITY_SECONDS);
     }
 
     public boolean isExpired() {

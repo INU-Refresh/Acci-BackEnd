@@ -31,7 +31,7 @@ public class AuthService {
 
         log.info("인증 코드 교환 성공: {}", code.substring(0, 8) + "...");
 
-        return TokenResponse.from(authCode.getAccessToken());
+        return TokenResponse.from(authCode.getAccessToken(), authCode.getAccessTokenExpiresIn());
     }
 
     public TokenResponse refresh(String refreshToken) {

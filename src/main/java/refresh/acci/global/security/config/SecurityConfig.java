@@ -98,7 +98,7 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/oauth2/**",
             "/api/v1/auth/oauth2/callback/**",
-            "/api/v1/auth/token/",
+            "/api/v1/auth/token",
             "/api/v1/auth/refresh"
     };
 

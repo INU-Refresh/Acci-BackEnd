@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import refresh.acci.domain.precedent.model.enums.PrecedentType;
 import refresh.acci.global.common.BaseTime;
 
 import java.time.LocalDate;

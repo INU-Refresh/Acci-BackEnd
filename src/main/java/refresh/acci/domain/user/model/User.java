@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import refresh.acci.domain.user.model.enums.Provider;
+import refresh.acci.domain.user.model.enums.Role;
 import refresh.acci.global.common.SoftDelete;
 
 @Entity

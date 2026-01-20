@@ -36,7 +36,21 @@ public enum ErrorCode {
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "파일 업로드에 실패했습니다."),
     UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 파일 형식입니다."),
     TOO_MANY_ANALYSIS_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, 429, "분석 요청이 너무 많습니다. 잠시 후 다시 시도해주세요."),
-    VIDEO_FILE_MISSING(HttpStatus.BAD_REQUEST, 400, "업로드할 비디오 파일이 없습니다.")
+    VIDEO_FILE_MISSING(HttpStatus.BAD_REQUEST, 400, "업로드할 비디오 파일이 없습니다."),
+
+    // Repair Estimate
+    INVALID_VEHICLE_BRAND(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 차량 브랜드입니다."),
+    INVALID_VEHICLE_TYPE(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 차종입니다."),
+    INVALID_VEHICLE_SEGMENT(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 차급입니다."),
+    INVALID_DAMAGE_SEVERITY(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 파손 정도입니다."),
+    INVALID_REPAIR_METHOD(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 수리 방법입니다."),
+    REPAIR_ESTIMATE_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "수리비 견적을 찾을 수 없습니다."),
+    LLM_API_CALL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "LLM API 호출에 실패했습니다."),
+    LLM_RESPONSE_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "LLM 응답 파싱에 실패했습니다."),
+    INVALID_VEHICLE_YEAR(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 연식입니다."),
+    DAMAGE_DETAILS_REQUIRED(HttpStatus.BAD_REQUEST, 400, "파손 부위 정보가 필요합니다."),
+    TOO_MANY_DAMAGE_DETAILS(HttpStatus.BAD_REQUEST, 400, "파손 부위는 최대 20개까지 입력 가능합니다.")
+
     ;
 
     private final HttpStatus httpStatus;

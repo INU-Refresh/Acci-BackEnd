@@ -1,4 +1,4 @@
-package refresh.acci.domain.user.model;
+package refresh.acci.domain.user.model.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

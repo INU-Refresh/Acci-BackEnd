@@ -1,7 +1,7 @@
 package refresh.acci.domain.user.infra;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import refresh.acci.domain.user.model.Provider;
+import refresh.acci.domain.user.model.enums.Provider;
 import refresh.acci.domain.user.model.User;
 
 import java.time.LocalDateTime;

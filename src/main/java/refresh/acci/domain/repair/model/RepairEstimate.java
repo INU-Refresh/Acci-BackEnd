@@ -2,35 +2,69 @@ package refresh.acci.domain.repair.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
+import refresh.acci.domain.repair.model.enums.EstimateStatus;
+import refresh.acci.global.common.BaseTime;
+
+import java.util.UUID;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "repair_estimate")
-public class RepairEstimate {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class RepairEstimate extends BaseTime {
 
-    @Column(name = "user_id")
+    @Id
+    @GeneratedValue
+    @UuidGenerator
+    @Column(columnDefinition = "BINARY(16)")
+    private UUID id;
+
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "vehicle_manufacturer", nullable = false)
-    private String vehicleManufacturer;
+    @Embedded
+    private VehicleInfo vehicleInfo;
 
-    @Column(name = "vehicle_model")
-    private String vehicleModel;
+    @Column(name = "user_description", length = 1000)
+    private String userDescription;
 
-    @Column(name = "panel_beating_cost", nullable = false)
-    private Long panelBeatingCost;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estimate_status", nullable = false)
+    private EstimateStatus estimateStatus;
 
-    @Column(name = "part_replacement_cost", nullable = false)
-    private Long partReplacementCost;
+    @Column(name = "total_estimated_cost")
+    private Long totalEstimatedCost;
 
-    @Column(name = "total_repair_cost", nullable = false)
-    private Long totalRepairCost;
+    @Builder
+    public RepairEstimate(Long userId, VehicleInfo vehicleInfo, String userDescription) {
+        this.userId = userId;
+        this.vehicleInfo = vehicleInfo;
+        this.userDescription = userDescription;
+        this.estimateStatus = EstimateStatus.PENDING;
+    }
 
+    public static RepairEstimate of(Long userId, VehicleInfo vehicleInfo, String userDescription) {
+        return RepairEstimate.builder()
+                .userId(userId)
+                .vehicleInfo(vehicleInfo)
+                .userDescription(userDescription)
+                .build();
+    }
 
+    public void startProcessing() {
+        this.estimateStatus = EstimateStatus.PROCESSING;
+    }
+
+    public void completeEstimate(Long totalCost) {
+        this.totalEstimatedCost = totalCost;
+        this.estimateStatus = EstimateStatus.COMPLETED;
+    }
+
+    public void failEstimate() {
+        this.estimateStatus = EstimateStatus.FAILED;
+    }
 }

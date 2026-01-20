@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.user.infra.UserRepository;
 import refresh.acci.domain.user.model.CustomOAuthUser;
-import refresh.acci.domain.user.model.Provider;
+import refresh.acci.domain.user.model.enums.Provider;
 import refresh.acci.domain.user.model.User;
 import refresh.acci.global.security.oauth.OAuthResponseFactory;
 import refresh.acci.global.security.oauth.attributes.OAuthAttributes;

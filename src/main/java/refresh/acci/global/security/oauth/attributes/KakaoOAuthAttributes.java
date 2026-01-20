@@ -2,7 +2,7 @@ package refresh.acci.global.security.oauth.attributes;
 
 import lombok.Builder;
 import lombok.Getter;
-import refresh.acci.domain.user.model.Role;
+import refresh.acci.domain.user.model.enums.Role;
 import refresh.acci.domain.user.model.User;
 
 import java.util.Map;

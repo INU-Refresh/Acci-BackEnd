@@ -34,12 +34,13 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Value("${jwt.refresh-token-validity-in-milliseconds}")
     private long refreshTokenValidityInMilliseconds;
 
-    //Redirect Uri White List
-    private static final List<String> ALLOWED_REDIRECT_URIS = List.of(
-            "https://acci-ai.vercel.app/oauth2/redirect",
-            "http://localhost:3000/oauth2/redirect",
-            "http://localhost:5173/oauth2/redirect"
+    private static final List<String> ALLOWED_ORIGINS = List.of(
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://acci-ai.vercel.app"
     );
+
+    private static final String OAUTH_REDIRECT_PATH = "/oauth2/redirect";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException{
@@ -55,7 +56,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         authCodeRepository.save(authCode);
         log.info("인증 코드 발급: {} (유효시간: 30초)", code.substring(0, 8) + "...");
 
-        //local 개발을 위한 redirect_url
+        //Origin 기반으로 redirect URL 결정
         String frontendRedirectUrl = determineFrontendRedirectUri(request);
 
         //AuthCode를 쿼리 파라미터로 FE에 전달
@@ -67,29 +68,53 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    //Referer 헤더 기반으로 프런트 Redirect Uri 분기
+    //Origin 헤더 우선, Referer 헤더 fallback으로 프런트 Redirect Uri 결정
     private String determineFrontendRedirectUri(HttpServletRequest request) {
+        String origin = request.getHeader("Origin");
         String referer = request.getHeader("Referer");
-        if (referer != null) {
-            if (referer.startsWith("http://localhost:3000")) {
-                return validateAndReturn("http://localhost:3000/oauth2/redirect");
-            }
-            if (referer.startsWith("http://localhost:5173")) {
-                return validateAndReturn("http://localhost:5173/oauth2/redirect");
-            }
-            if (referer.contains("acci-ai.vercel.app")) {
-                return validateAndReturn("https://acci-ai.vercel.app/oauth2/redirect");
-            }
+
+        //Origin 헤더에서 추출
+        String extractedOrigin = extractOriginFromHeader(origin);
+        if (extractedOrigin != null) {
+            return buildRedirectUrl(extractedOrigin);
         }
+
+        //Referer 헤더에서 추출
+        extractedOrigin = extractOriginFromReferer(referer);
+        if (extractedOrigin != null) {
+            return buildRedirectUrl(extractedOrigin);
+        }
+
         return redirectUri;
     }
 
-    private String validateAndReturn(String uri) {
-        if (ALLOWED_REDIRECT_URIS.contains(uri)) {
-            return uri;
+    //Origin 헤더 검증 및 추출
+    private String extractOriginFromHeader(String origin) {
+        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+            return origin;
         }
-        log.warn("허용되지 않은 redirect URI 시도: {}", uri);
-        return redirectUri;
+        if (origin != null) {
+            log.warn("허용되지 않은 Origin: {}", origin);
+        }
+        return null;
+    }
+
+    //Referer 헤더에서 origin 추출
+    private String extractOriginFromReferer(String referer) {
+        if (referer == null) {
+            return null;
+        }
+        for (String allowedOrigin : ALLOWED_ORIGINS) {
+            if (referer.startsWith(allowedOrigin)) {
+                return allowedOrigin;
+            }
+        }
+        log.warn("허용되지 않은 Referer: {}", referer);
+        return null;
+    }
+
+    // Redirect URL 생성
+    private String buildRedirectUrl(String origin) {
+        return origin + OAUTH_REDIRECT_PATH;
     }
 }
-

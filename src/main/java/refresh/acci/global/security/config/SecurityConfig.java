@@ -93,16 +93,29 @@ public class SecurityConfig {
 
 
     private static final String[] PUBLIC_ENDPOINTS = {
+            //Swagger
             "/swagger-ui/**",
             "/v3/api-docs/**",
+
+            //로그인 및 인증
             "/oauth2/**",
             "/api/v1/auth/oauth2/callback/**",
             "/api/v1/auth/token",
-            "/api/v1/auth/refresh"
+            "/api/v1/auth/refresh",
+
+            //사고 영상 분석
+            "/api/v1/analyses/loading"
     };
 
     private static final String[] AUTHENTICATED_ENDPOINTS = {
+            //로그인 및 인증
             "/api/v1/auth/logout",
-            "/api/v1/users/**"
+            "/api/v1/users/**",
+
+            //사고 영상 분석
+            "/api/v1/analyses/**",
+
+            //수리비 견적
+            "/api/v1/repair-estimates/**"
     };
 }

@@ -80,6 +80,14 @@ jwt:
   access-token-validity-in-milliseconds: 15552000000  #6개월
   refresh-token-validity-in-milliseconds: 31104000000 #1년
 
+# OpenAI 설정
+openai:
+  api-key: ${OPENAI_API_KEY}
+  base-url: https://api.openai.com/v1
+  model: gpt-5-nano
+  max-tokens: 2000
+  temperature: 0.3
+
 # 애플리케이션 설정
 app:
   oauth2:

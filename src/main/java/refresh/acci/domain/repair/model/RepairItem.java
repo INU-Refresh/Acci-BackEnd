@@ -32,23 +32,23 @@ public class RepairItem {
     @Column(name = "repair_method", nullable = false)
     private RepairMethod repairMethod;
 
-    @Column(name = "total_cost", nullable = false)
-    private Long totalCost;
+    @Column(name = "cost", nullable = false)
+    private Long cost;
 
     @Builder
-    public RepairItem(UUID repairEstimateId, String partName, RepairMethod repairMethod, Long totalCost) {
+    public RepairItem(UUID repairEstimateId, String partName, RepairMethod repairMethod, Long cost) {
         this.repairEstimateId = repairEstimateId;
         this.partName = partName;
         this.repairMethod = repairMethod;
-        this.totalCost = totalCost;
+        this.cost = cost;
     }
 
-    public static RepairItem of(UUID repairEstimateId, String partName, RepairMethod repairMethod, Long totalCost) {
+    public static RepairItem of(UUID repairEstimateId, String partName, RepairMethod repairMethod, Long cost) {
         return RepairItem.builder()
                 .repairEstimateId(repairEstimateId)
                 .partName(partName)
                 .repairMethod(repairMethod)
-                .totalCost(totalCost)
+                .cost(cost)
                 .build();
     }
 }

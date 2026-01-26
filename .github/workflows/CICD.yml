@@ -87,6 +87,7 @@ jobs:
               -e "BACKEND_URL=${{ secrets.BACKEND_URL }}" \
               -e "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" \
               -e "AI_SERVER_URL=${{ secrets.AI_SERVER_URL }}" \
+              -e "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
               -p "8080:8080" \
               "$IMAGE"
 

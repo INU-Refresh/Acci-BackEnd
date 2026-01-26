@@ -2,8 +2,10 @@ package refresh.acci.domain.repair.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import refresh.acci.domain.repair.application.event.RepairEstimateCreatedEvent;
 import refresh.acci.domain.repair.infra.persistence.DamageDetailRepository;
 import refresh.acci.domain.repair.infra.persistence.RepairEstimateRepository;
 import refresh.acci.domain.repair.infra.persistence.RepairItemRepository;
@@ -22,7 +24,6 @@ import refresh.acci.global.exception.ErrorCode;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -34,7 +35,7 @@ public class RepairEstimateService {
     private final DamageDetailRepository damageDetailRepository;
     private final RepairItemRepository repairItemRepository;
     private final RepairEstimateWorkerService workerService;
-    private final Executor repairEstimateExecutor;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public RepairEstimateResponse createEstimate(RepairEstimateRequest request, Long userId) {
@@ -48,8 +49,8 @@ public class RepairEstimateService {
         //DamageDetail Entity 생성 및 저장
         List<DamageDetail> damageDetails = saveDamageDetails(estimate.getId(), request.getDamages());
 
-        //비동기로 견적 처리
-        repairEstimateExecutor.execute(() -> workerService.processEstimate(estimate.getId()));
+        //비동기로 견적 처리(이벤트 발행)
+        eventPublisher.publishEvent(new RepairEstimateCreatedEvent(estimate.getId()));
 
         log.info("수리비 견적 요청 생성 - estimateId: {}, userId: {}", estimate.getId(), userId);
 

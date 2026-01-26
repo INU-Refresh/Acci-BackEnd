@@ -17,8 +17,8 @@ public class OpenAiRequest {
     @JsonProperty("response_format")
     private ResponseFormat responseFormat;
 
-    @JsonProperty("max_tokens")
-    private int maxTokens;
+    @JsonProperty("max_completion_tokens")
+    private Integer maxCompletionTokens;
 
     private double temperature;
 

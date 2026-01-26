@@ -92,7 +92,7 @@ public class RepairEstimateLlmClient {
                         new OpenAiRequest.Message(USER_ROLE, userPrompt)
                 ))
                 .responseFormat(new OpenAiRequest.ResponseFormat(JSON_RESPONSE_TYPE))
-                .maxTokens(maxTokens)
+                .maxCompletionTokens(maxTokens)
                 .temperature(temperature)
                 .build();
     }

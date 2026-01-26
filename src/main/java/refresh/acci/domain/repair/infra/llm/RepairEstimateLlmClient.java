@@ -93,7 +93,7 @@ public class RepairEstimateLlmClient {
                 ))
                 .responseFormat(new OpenAiRequest.ResponseFormat(JSON_RESPONSE_TYPE))
                 .maxCompletionTokens(maxTokens)
-                .temperature(temperature)
+                /*.temperature(temperature) 일부 모델에서 변경 불가 -> 기본값 사용*/
                 .build();
     }
 

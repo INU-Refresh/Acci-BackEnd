@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
     private static final String AUTHORITIES_KEY = "auth";
+    private static final String GRANT_TYPE = "Bearer";
 
     private final String key;
     private final long accessTokenValidityInMilliSeconds;
@@ -50,12 +51,17 @@ public class JwtTokenProvider {
                 authorities,
                 accessTokenExpiresIn
         );
-        String refreshToken = createRefreshToken(refreshTokenExpiresIn);
+        String refreshToken = createRefreshToken(
+                authentication.getName(),
+                refreshTokenExpiresIn
+        );
 
         return TokenDto.builder()
+                .grantType(GRANT_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+                .refreshTokenExpiresIn(refreshTokenExpiresIn.getTime())
                 .build();
     }
 
@@ -113,8 +119,9 @@ public class JwtTokenProvider {
     }
 
     //RefreshToken 생성
-    private String createRefreshToken(Date expiresIn) {
+    private String createRefreshToken(String subject, Date expiresIn) {
         return Jwts.builder()
+                .setSubject(subject)
                 .setExpiration(expiresIn)
                 .signWith(getSecretKey(), SignatureAlgorithm.HS512)
                 .compact();

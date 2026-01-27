@@ -21,15 +21,15 @@ public class AuthController implements AuthApiSpecification{
     private final AuthService authService;
 
     @PostMapping("/token")
-    public ResponseEntity<TokenResponse> exchangeToken(@Valid @RequestBody TokenExchangeRequest request) {
-        TokenResponse response = authService.exchangeCodeForToken(request.getCode());
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public ResponseEntity<TokenResponse> exchangeToken(@Valid @RequestBody TokenExchangeRequest request, HttpServletResponse response) {
+        TokenResponse tokenResponse = authService.exchangeCodeForToken(request.getCode(), response);
+        return ResponseEntity.status(HttpStatus.OK).body(tokenResponse);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh (@CookieValue(name = "refreshToken") String refreshToken) {
-        TokenResponse response = authService.refresh(refreshToken);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public ResponseEntity<TokenResponse> refresh (@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
+        TokenResponse tokenResponse = authService.refresh(refreshToken, response);
+        return ResponseEntity.status(HttpStatus.OK).body(tokenResponse);
     }
 
     @PostMapping("/logout")

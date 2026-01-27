@@ -25,26 +25,38 @@ public class AuthService {
     private final AuthCodeRepository authCodeRepository;
 
     @Transactional
-    public TokenResponse exchangeCodeForToken(String code) {
+    public TokenResponse exchangeCodeForToken(String code, HttpServletResponse response) {
         AuthCode authCode = getAuthCodeOrThrow(code);
         authCodeRepository.deleteByCode(code);
 
+        CookieUtil.setAuthTokenCookies(response,
+                authCode.getAccessToken(),
+                authCode.getAccessTokenExpiresIn(),
+                authCode.getRefreshToken(),
+                authCode.getRefreshTokenExpiresIn());
+
         log.info("인증 코드 교환 성공: {}", code.substring(0, 8) + "...");
 
-        return TokenResponse.from(authCode.getAccessToken(), authCode.getAccessTokenExpiresIn());
+        return TokenResponse.from(authCode.getAccessTokenExpiresIn());
     }
 
-    public TokenResponse refresh(String refreshToken) {
+    public TokenResponse refresh(String refreshToken, HttpServletResponse response) {
         validateToken(refreshToken);
 
         Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
         TokenDto tokenDto = jwtTokenProvider.generateTokenDto(authentication);
 
+        CookieUtil.setAuthTokenCookies(response,
+                tokenDto.getAccessToken(),
+                tokenDto.getAccessTokenExpiresIn(),
+                tokenDto.getRefreshToken(),
+                tokenDto.getRefreshTokenExpiresIn());
+
         return TokenResponse.from(tokenDto);
     }
 
     public void logout(String providerId, HttpServletResponse response) {
-        CookieUtil.deleteRefreshTokenCookie(response);
+        CookieUtil.deleteAllAuthCookies(response);
         log.info("로그아웃 완료 - providerId: {}", providerId);
     }
 

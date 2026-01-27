@@ -14,9 +14,10 @@ import refresh.acci.domain.auth.infra.AuthCodeRepository;
 import refresh.acci.domain.auth.model.AuthCode;
 import refresh.acci.global.security.jwt.JwtTokenProvider;
 import refresh.acci.global.security.jwt.TokenDto;
-import refresh.acci.global.util.CookieUtil;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,32 +32,31 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
 
-    @Value("${jwt.refresh-token-validity-in-milliseconds}")
-    private long refreshTokenValidityInMilliseconds;
-
     private static final List<String> ALLOWED_ORIGINS = List.of(
             "http://localhost:3000",
             "http://localhost:5173",
             "https://acci-ai.vercel.app"
     );
 
-    private static final String OAUTH_REDIRECT_PATH = "/oauth2/redirect";
-
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException{
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         TokenDto tokenDto = jwtTokenProvider.generateTokenDto(authentication);
 
-        //Refresh Token Cookie에 저장
-        int maxAge = (int) (refreshTokenValidityInMilliseconds / 1000);
-        CookieUtil.addRefreshTokenCookie(response, tokenDto.getRefreshToken(), maxAge);
-
-        //AuthCode 생성
+        //Access Token + Refresh Token을 AuthCode에 저장 (30초 유효)
         String code = UUID.randomUUID().toString();
-        AuthCode authCode = AuthCode.of(code, tokenDto.getAccessToken(), tokenDto.getAccessTokenExpiresIn());
+        AuthCode authCode = AuthCode.of(
+                code,
+                tokenDto.getAccessToken(),
+                tokenDto.getAccessTokenExpiresIn(),
+                tokenDto.getRefreshToken(),
+                tokenDto.getRefreshTokenExpiresIn()
+        );
         authCodeRepository.save(authCode);
-        log.info("인증 코드 발급: {} (유효시간: 30초)", code.substring(0, 8) + "...");
 
-        //Origin 기반으로 redirect URL 결정
+        log.info("OAuth 로그인 성공 - providerId: {}", authentication.getName());
+        log.debug("AuthCode 발급: {}", code.substring(0, 8) + "...");
+
+        //프론트엔드 리다이렉트 URL 결정 (Origin 헤더 우선)
         String frontendRedirectUrl = determineFrontendRedirectUri(request);
 
         //AuthCode를 쿼리 파라미터로 FE에 전달
@@ -68,53 +68,39 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    //Origin 헤더 우선, Referer 헤더 fallback으로 프런트 Redirect Uri 결정
+    //Front Redirect URI 결정
     private String determineFrontendRedirectUri(HttpServletRequest request) {
         String origin = request.getHeader("Origin");
-        String referer = request.getHeader("Referer");
 
-        //Origin 헤더에서 추출
-        String extractedOrigin = extractOriginFromHeader(origin);
-        if (extractedOrigin != null) {
-            return buildRedirectUrl(extractedOrigin);
+        //Origin 헤더 검증
+        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+            log.debug("Origin 헤더에서 리다이렉트 URI 결정: {}", origin);
+            return buildRedirectUrl(origin);
         }
 
-        //Referer 헤더에서 추출
-        extractedOrigin = extractOriginFromReferer(referer);
-        if (extractedOrigin != null) {
-            return buildRedirectUrl(extractedOrigin);
+        //Origin이 없거나 허용되지 않은 경우 기본값 사용
+        if (origin != null) {
+            log.warn("허용되지 않은 Origin: {}, 기본 redirect URI 사용", origin);
+        } else {
+            log.debug("Origin 헤더 없음, 기본 redirect URI 사용");
         }
 
         return redirectUri;
     }
 
-    //Origin 헤더 검증 및 추출
-    private String extractOriginFromHeader(String origin) {
-        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
-            return origin;
-        }
-        if (origin != null) {
-            log.warn("허용되지 않은 Origin: {}", origin);
-        }
-        return null;
-    }
-
-    //Referer 헤더에서 origin 추출
-    private String extractOriginFromReferer(String referer) {
-        if (referer == null) {
-            return null;
-        }
-        for (String allowedOrigin : ALLOWED_ORIGINS) {
-            if (referer.startsWith(allowedOrigin)) {
-                return allowedOrigin;
-            }
-        }
-        log.warn("허용되지 않은 Referer: {}", referer);
-        return null;
-    }
-
-    // Redirect URL 생성
+    //Redirect URL 생성
     private String buildRedirectUrl(String origin) {
-        return origin + OAUTH_REDIRECT_PATH;
+        return origin + extractRedirectPath();
     }
+
+    //Path 추출
+    private String extractRedirectPath() {
+        try {
+            return new URI(redirectUri).getPath();
+        } catch (URISyntaxException e) {
+            log.warn("잘못된 redirect URI 형식: {}, 기본값 사용", redirectUri);
+            return "/oauth2/redirect";
+        }
+    }
+
 }

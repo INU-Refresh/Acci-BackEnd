@@ -34,7 +34,7 @@ public class MyPageService {
 
         user.softDelete();
 
-        CookieUtil.deleteRefreshTokenCookie(response);
+        CookieUtil.deleteAllAuthCookies(response);
         log.info("회원 탈퇴 완료 - userId: {}, providerId: {}", userId, providerId);
     }
 

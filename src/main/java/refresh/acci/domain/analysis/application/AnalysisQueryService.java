@@ -10,6 +10,7 @@ import refresh.acci.domain.analysis.presentation.dto.res.AnalysisResultResponse;
 import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -35,5 +36,10 @@ public class AnalysisQueryService {
                     log.warn("해당 분석을 찾을 수 없습니다. ID: {}", analysisId);
                     return new CustomException(ErrorCode.ANALYSIS_NOT_FOUND);
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public List<AnalysisResultResponse> getUserAnalysisHistory(Long userId) {
+        return analysisRepository.findAllAnalysesResultByUserId(userId);
     }
 }

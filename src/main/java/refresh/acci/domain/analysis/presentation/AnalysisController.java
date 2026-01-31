@@ -14,6 +14,7 @@ import refresh.acci.domain.analysis.presentation.dto.res.AnalysisResultResponse;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisUploadResponse;
 import refresh.acci.domain.user.model.CustomUserDetails;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -47,5 +48,11 @@ public class AnalysisController implements AnalysisApiSpecification{
     @GetMapping("/{analysisId}")
     public ResponseEntity<AnalysisResultResponse> getAnalysisResult(@PathVariable UUID analysisId) {
         return ResponseEntity.status(HttpStatus.OK).body(analysisService.getAnalysisResult(analysisId));
+    }
+
+    // 회원의 전체 분석 기록 조회
+    @GetMapping("/history")
+    public ResponseEntity<List<AnalysisResultResponse>> getUserAnalysisHistory(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.status(HttpStatus.OK).body(analysisService.getUserAnalysisHistory(userDetails));
     }
 }

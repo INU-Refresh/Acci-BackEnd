@@ -15,6 +15,7 @@ import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -72,5 +73,10 @@ public class AnalysisService {
     @Transactional(readOnly = true)
     public AnalysisResultResponse getAnalysisResult(UUID analysisId) {
         return analysisQueryService.getAnalysisResult(analysisId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AnalysisResultResponse> getUserAnalysisHistory(CustomUserDetails userDetails) {
+        return analysisQueryService.getUserAnalysisHistory(userDetails.getId());
     }
 }

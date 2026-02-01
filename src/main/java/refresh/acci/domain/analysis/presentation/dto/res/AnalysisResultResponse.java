@@ -1,23 +1,51 @@
 package refresh.acci.domain.analysis.presentation.dto.res;
 
+import refresh.acci.domain.analysis.model.Analysis;
 import refresh.acci.domain.analysis.model.enums.AnalysisStatus;
-import refresh.acci.domain.analysis.model.enums.AccidentType;
 
 import java.util.UUID;
 
 public record AnalysisResultResponse(
 
-        UUID id,
+        UUID analysisId,
+
+        String aiJobId,
 
         Long userId,
 
-        Long accidentRate,
+        AccidentTypeResponse accident_type,
 
-        AccidentType accidentType,
+        int vehicle_A_fault,
+
+        int vehicle_B_fault,
+
+        String place,
+
+        String situation,
+
+        String vehicle_a,
+
+        String vehicle_b,
 
         AnalysisStatus analysisStatus,
 
         boolean isCompleted
 
 ) {
+    public static AnalysisResultResponse of(Analysis analysis) {
+        return new AnalysisResultResponse(
+                analysis.getId(),
+                analysis.getAiJobId(),
+                analysis.getUserId(),
+                AccidentTypeResponse.of(analysis.getAccidentType()),
+                analysis.getAccidentRateA().intValue(),
+                analysis.getAccidentRateB().intValue(),
+                analysis.getPlace(),
+                analysis.getSituation(),
+                analysis.getVehicleASituation(),
+                analysis.getVehicleBSituation(),
+                analysis.getAnalysisStatus(),
+                analysis.isCompleted()
+        );
+    }
 }

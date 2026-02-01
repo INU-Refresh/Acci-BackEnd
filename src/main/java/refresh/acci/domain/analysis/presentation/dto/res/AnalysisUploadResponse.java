@@ -9,12 +9,19 @@ public record AnalysisUploadResponse(
 
         UUID analysisId,
 
+        String aiJobId,
+
         AnalysisStatus analysisStatus,
 
         boolean isCompleted
 
 ) {
     public static AnalysisUploadResponse of(Analysis analysis) {
-        return new AnalysisUploadResponse(analysis.getId(), analysis.getAnalysisStatus(), analysis.isCompleted());
+        return new AnalysisUploadResponse(
+                analysis.getId(),
+                analysis.getAiJobId(),
+                analysis.getAnalysisStatus(),
+                analysis.isCompleted()
+        );
     }
 }

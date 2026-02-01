@@ -2,7 +2,6 @@ package refresh.acci.domain.analysis.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -30,11 +29,8 @@ public class AnalysisWorkerService {
 
     private final AnalysisSseService sseService;
     private final AnalysisCommandService analysisCommandService;
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient aiWebClient;
     private final TempVideoStore tempVideoStore;
-
-    @Value("${ai.server.url}")
-    private String aiServerUrl;
 
     public void runAnalysis(UUID analysisId, Path tempFilePath) {
         try {
@@ -87,9 +83,7 @@ public class AnalysisWorkerService {
                 .filename(tempFilePath.getFileName().toString())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM);
 
-        WebClient webClient = webClientBuilder.baseUrl(aiServerUrl).build();
-
-        return webClient.post()
+        return aiWebClient.post()
                 .uri("/api/v1/analyze") // AI 서버의 분석 엔드포인트
                 .contentType(MediaType.MULTIPART_FORM_DATA) // Content-Type 설정
                 .body(BodyInserters.fromMultipartData(builder.build())) // 멀티파트 데이터를 실제 HTTP 요청 바디로 인코딩해서 넣음
@@ -101,7 +95,7 @@ public class AnalysisWorkerService {
                                     return Mono.error(new CustomException(ErrorCode.AI_SERVER_COMMUNICATION_FAILED));
                                 })) // 오류 상태 처리
                 .bodyToMono(AiAnalyzeResponse.class) // 응답 바디를 AnalysisUploadResponse 객체로 변환
-                .timeout(Duration.ofMinutes(5)) // 타임아웃 5분
+                .timeout(Duration.ofSeconds(30)) // 타임아웃 30초
                 .block(); // Mono를 동기 방식으로 기다려서 결과를 실제 객체로 꺼냄
     }
 
@@ -138,9 +132,7 @@ public class AnalysisWorkerService {
 
     // AI 서버에서 분석 상태 조회
     private AiStatusResponse getStatus(String jobId) {
-        WebClient webClient = webClientBuilder.baseUrl(aiServerUrl).build();
-
-        return webClient.get()
+        return aiWebClient.get()
                 .uri("/api/v1/status/{jobId}", jobId)
                 .retrieve()
                 .onStatus(
@@ -160,9 +152,7 @@ public class AnalysisWorkerService {
 
     // AI 서버에서 분석 결과 조회
     private AiResultResponse getResult(String jobId) {
-        WebClient webClient = webClientBuilder.baseUrl(aiServerUrl).build();
-
-        return webClient.get()
+        return aiWebClient.get()
                 .uri("/api/v1/result/{jobId}", jobId)
                 .retrieve()
                 .onStatus(

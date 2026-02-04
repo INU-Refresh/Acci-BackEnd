@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.analysis.infra.persistence.AnalysisRepository;
 import refresh.acci.domain.analysis.model.Analysis;
-import refresh.acci.domain.analysis.presentation.dto.res.AnalysisResultResponse;
 import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 
@@ -30,16 +29,7 @@ public class AnalysisQueryService {
     }
 
     @Transactional(readOnly = true)
-    public AnalysisResultResponse getAnalysisResult(UUID analysisId) {
-        return analysisRepository.findAnalysesResultById(analysisId)
-                .orElseThrow(() -> {
-                    log.warn("해당 분석을 찾을 수 없습니다. ID: {}", analysisId);
-                    return new CustomException(ErrorCode.ANALYSIS_NOT_FOUND);
-                });
-    }
-
-    @Transactional(readOnly = true)
-    public List<AnalysisResultResponse> getUserAnalysisHistory(Long userId) {
-        return analysisRepository.findAllAnalysesResultByUserId(userId);
+    public List<Analysis> getUserAnalysisHistory(Long userId) {
+        return analysisRepository.findAllByUserId(userId);
     }
 }

@@ -94,12 +94,14 @@ public class AnalysisService {
 
     @Transactional(readOnly = true)
     public AnalysisResultResponse getAnalysisResult(UUID analysisId) {
-        return analysisQueryService.getAnalysisResult(analysisId);
+        Analysis analysis = analysisQueryService.getAnalysis(analysisId);
+        return AnalysisResultResponse.of(analysis);
     }
 
     @Transactional(readOnly = true)
     public List<AnalysisResultResponse> getUserAnalysisHistory(CustomUserDetails userDetails) {
-        return analysisQueryService.getUserAnalysisHistory(userDetails.getId());
+        List<Analysis> analyses = analysisQueryService.getUserAnalysisHistory(userDetails.getId());
+        return analyses.stream().map(AnalysisResultResponse::of).toList();
     }
 
     @Transactional(readOnly = true)

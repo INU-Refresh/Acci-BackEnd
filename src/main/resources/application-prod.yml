@@ -94,6 +94,9 @@ app:
     redirect-uri: ${FRONTEND_URL}/oauth2/redirect
   cookie:
     secure: true
+    domain: .acci-ai.site
+    access-token-same-site: Lax
+    refresh-token-same-site: Strict
 
 server:
   port: 8080

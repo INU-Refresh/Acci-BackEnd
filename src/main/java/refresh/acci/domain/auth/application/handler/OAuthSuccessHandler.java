@@ -35,7 +35,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private static final List<String> ALLOWED_ORIGINS = List.of(
             "http://localhost:3000",
             "http://localhost:5173",
-            "https://acci-ai.vercel.app"
+            "https://acci-ai.site"
     );
 
     @Override

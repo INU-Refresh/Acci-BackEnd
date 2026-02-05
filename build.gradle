@@ -60,7 +60,10 @@ dependencies {
 	// File
 	implementation 'commons-io:commons-io:2.15.1'
 
-    // Testing
+	// Properties
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+  // Testing
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

@@ -23,13 +23,14 @@ public class AuthService {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthCodeRepository authCodeRepository;
+    private final CookieUtil cookieUtil;
 
     @Transactional
     public TokenResponse exchangeCodeForToken(String code, HttpServletResponse response) {
         AuthCode authCode = getAuthCodeOrThrow(code);
         authCodeRepository.deleteByCode(code);
 
-        CookieUtil.setAuthTokenCookies(
+        cookieUtil.setAuthTokenCookies(
                 response,
                 authCode.getAccessToken(),
                 authCode.getAccessTokenMaxAge(),
@@ -48,7 +49,7 @@ public class AuthService {
         Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
         TokenDto tokenDto = jwtTokenProvider.generateTokenDto(authentication);
 
-        CookieUtil.setAuthTokenCookies(response,
+        cookieUtil.setAuthTokenCookies(response,
                 tokenDto.getAccessToken(),
                 tokenDto.getAccessTokenMaxAge(),
                 tokenDto.getRefreshToken(),
@@ -58,13 +59,13 @@ public class AuthService {
     }
 
     public void logout(String providerId, HttpServletResponse response) {
-        CookieUtil.deleteAllAuthCookies(response);
+        cookieUtil.deleteAllAuthCookies(response);
         log.info("로그아웃 완료 - providerId: {}", providerId);
     }
 
     //인증 정보 제거
     public void clearAuthentication(HttpServletResponse response) {
-        CookieUtil.deleteAllAuthCookies(response);
+        cookieUtil.deleteAllAuthCookies(response);
     }
 
     //AuthCode 가져오기

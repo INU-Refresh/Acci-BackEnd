@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface RepairEstimateRepository extends JpaRepository<RepairEstimate, UUID> {
 
     List<RepairEstimate> findByUserId(Long userId);
+
+    List<RepairEstimate> findTop3ByUserIdOrderByCreatedAtDesc(Long userId);
 }

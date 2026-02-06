@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.repair.infra.llm.RepairEstimateLlmClient;
+import refresh.acci.domain.repair.infra.llm.RepairPromptBuilder;
 import refresh.acci.domain.repair.infra.llm.dto.RepairEstimateLlmRequest;
 import refresh.acci.domain.repair.infra.llm.dto.RepairEstimateLlmResponse;
 import refresh.acci.domain.repair.infra.persistence.DamageDetailRepository;

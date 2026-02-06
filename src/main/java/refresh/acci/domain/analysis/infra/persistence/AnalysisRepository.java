@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface AnalysisRepository extends JpaRepository<Analysis, UUID> {
 
     List<Analysis> findAllByUserId(Long userId);
+
+    List<Analysis> findTop3ByUserIdOrderByCreatedAtDesc(Long userId);
 }

@@ -34,7 +34,7 @@ public class AuthController implements AuthApiSpecification{
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout (@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response) {
-        authService.logout(userDetails.getName(), response);
+        authService.logout(userDetails.getUsername(), response);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

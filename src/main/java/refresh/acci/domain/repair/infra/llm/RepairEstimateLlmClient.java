@@ -112,7 +112,7 @@ public class RepairEstimateLlmClient {
                     .map(OpenAiResponse.Message::getContent)
                     .filter(text -> !text.isBlank())
                     .orElseThrow(() -> {
-                        log.error("OpenAI 응답에 content가 없습니다.");
+                        log.error("OpenAI 응답에 content가 없습니다. Raw Response: {}", responseString);
                         return new CustomException(ErrorCode.LLM_RESPONSE_PARSE_FAILED);
                     });
 

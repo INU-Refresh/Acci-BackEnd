@@ -96,7 +96,7 @@ app:
     secure: true
     domain: .acci-ai.site
     access-token-same-site: Lax
-    refresh-token-same-site: Strict
+    refresh-token-same-site: Lax
 
 server:
   port: 8080

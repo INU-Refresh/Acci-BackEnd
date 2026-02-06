@@ -47,7 +47,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "https://acci-ai.site",
-                "https://www.acci-ai.site"
+                "https://www.acci-ai.site",
+                "https://api.acci-ai.site"
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

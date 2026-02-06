@@ -53,6 +53,7 @@ public class JwtTokenProvider {
         );
         String refreshToken = createRefreshToken(
                 authentication.getName(),
+                authorities,
                 refreshTokenExpiresAt
         );
 
@@ -121,9 +122,10 @@ public class JwtTokenProvider {
     }
 
     //RefreshToken 생성
-    private String createRefreshToken(String subject, Date expiresIn) {
+    private String createRefreshToken(String subject, String authorities, Date expiresIn) {
         return Jwts.builder()
                 .setSubject(subject)
+                .claim(AUTHORITIES_KEY, authorities)
                 .setExpiration(expiresIn)
                 .signWith(getSecretKey(), SignatureAlgorithm.HS512)
                 .compact();

@@ -40,15 +40,25 @@ public class SwaggerConfig {
                 .in(SecurityScheme.In.HEADER)
                 .name("Authorization");
 
+        // 보안 스키마 (Cookie)
+        SecurityScheme cookieAuth = new SecurityScheme()
+                .type(SecurityScheme.Type.APIKEY)
+                .in(SecurityScheme.In.COOKIE)
+                .name("accessToken");
+
         // 보안 요구 사항 (전역 적용)
         SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList("bearerAuth");
+                .addList("bearerAuth")
+                .addList("cookieAuth");
 
         // OpenAPI 객체 구성
         return new OpenAPI()
                 .info(info)
                 .servers(List.of(server, localServer))
-                .components(new Components().addSecuritySchemes("bearerAuth", bearerAuth))
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth", bearerAuth)
+                        .addSecuritySchemes("cookieAuth", cookieAuth)
+                )
                 .addSecurityItem(securityRequirement);
     }
 }

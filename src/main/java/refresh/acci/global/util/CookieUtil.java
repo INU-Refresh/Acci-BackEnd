@@ -2,10 +2,12 @@ package refresh.acci.global.util;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import refresh.acci.global.config.CookieProperties;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CookieUtil {
@@ -79,11 +81,13 @@ public class CookieUtil {
     public void setAuthTokenCookies(HttpServletResponse response, String accessToken, Integer accessMaxAge, String refreshToken, Integer refreshMaxAge) {
         setAccessTokenCookie(response, accessToken, accessMaxAge);
         setRefreshTokenCookie(response, refreshToken, refreshMaxAge);
+        log.debug("인증 쿠키 설정 완료 - AccessToken, RefreshToken");
     }
 
     //로그아웃: Access Token + Refresh Token 모두 삭제
     public void deleteAllAuthCookies(HttpServletResponse response) {
         deleteAccessTokenCookie(response);
         deleteRefreshTokenCookie(response);
+        log.debug("인증 쿠키 삭제 완료 - AccessToken, RefreshToken");
     }
 }

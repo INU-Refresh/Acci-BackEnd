@@ -15,11 +15,11 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AnalysisQueryService {
 
     private final AnalysisRepository analysisRepository;
 
-    @Transactional(readOnly = true)
     public Analysis getAnalysis(UUID analysisId) {
         return analysisRepository.findById(analysisId)
                 .orElseThrow(() -> {
@@ -28,8 +28,11 @@ public class AnalysisQueryService {
                 });
     }
 
-    @Transactional(readOnly = true)
     public List<Analysis> getUserAnalysisHistory(Long userId) {
         return analysisRepository.findAllByUserId(userId);
+    }
+
+    public List<Analysis> getRecentAnalyses(Long userId) {
+        return analysisRepository.findTop3ByUserIdOrderByCreatedAtDesc(userId);
     }
 }

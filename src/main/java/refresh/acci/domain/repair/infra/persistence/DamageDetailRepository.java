@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface DamageDetailRepository extends JpaRepository<DamageDetail, Long> {
     //수리비 견적 ID로 손상 내역 조회
     List<DamageDetail> findByRepairEstimateId(UUID repairEstimateId);
+
+    List<DamageDetail> findByRepairEstimateIdIn(List<UUID> repairEstimateIds);
 }

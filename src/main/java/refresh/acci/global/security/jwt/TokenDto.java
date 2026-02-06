@@ -6,11 +6,11 @@ import lombok.Getter;
 @Getter
 @Builder
 public class TokenDto {
-    private String grantType;
-    private String accessToken;
-    private String refreshToken;
-    private Long accessTokenExpiresAt;
-    private Long refreshTokenExpiresAt;
-    private Integer accessTokenMaxAge;
-    private Integer refreshTokenMaxAge;
+    private final String grantType;
+    private final String accessToken;
+    private final String refreshToken;
+    private final Long accessTokenExpiresAt;
+    private final Long refreshTokenExpiresAt;
+    private final Integer accessTokenMaxAge;
+    private final Integer refreshTokenMaxAge;
 }

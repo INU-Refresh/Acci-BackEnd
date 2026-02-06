@@ -1,4 +1,4 @@
-package refresh.acci.domain.repair.application;
+package refresh.acci.domain.repair.infra.llm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

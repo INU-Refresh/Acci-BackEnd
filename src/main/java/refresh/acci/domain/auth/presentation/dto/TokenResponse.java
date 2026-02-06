@@ -6,15 +6,10 @@ import lombok.Getter;
 import refresh.acci.global.security.jwt.TokenDto;
 
 @Getter
+@Builder
 public class TokenResponse {
     private final String grantType;
     private final Long accessTokenExpiresAt;
-
-    @Builder
-    public TokenResponse(String grantType, Long accessTokenExpiresAt) {
-        this.grantType = grantType;
-        this.accessTokenExpiresAt = accessTokenExpiresAt;
-    }
 
     //Refresh Token
     public static TokenResponse from(TokenDto tokenDto) {

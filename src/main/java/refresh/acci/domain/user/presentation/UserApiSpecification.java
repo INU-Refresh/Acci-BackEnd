@@ -47,7 +47,24 @@ public interface UserApiSpecification {
                                                         "createdAt": "2024-03-20T10:00:00"
                                                     }
                                                 ],
-                                                "recentRepairEstimates": []
+                                                "recentRepairEstimates": [
+                                                    {
+                                                        "estimateId": "660f8400-e29b-41d4-a716-446655440111",
+                                                        "estimateStatus": "COMPLETED",
+                                                        "totalEstimate": 1500000,
+                                                        "vehicleModel": "GV80",
+                                                        "damageSummary": "앞 범퍼 외 2개 부위",
+                                                        "createdAt": "2024-03-21T15:30:00"
+                                                    },
+                                                    {
+                                                        "estimateId": "770f8400-e29b-41d4-a716-446655440222",
+                                                        "estimateStatus": "PROCESSING",
+                                                        "totalEstimate": null,
+                                                        "vehicleModel": "Avante",
+                                                        "damageSummary": "운전석 휀더",
+                                                        "createdAt": "2024-03-22T09:00:00"
+                                                    }
+                                                ]
                                             }
                                             """))),
                     @ApiResponse(

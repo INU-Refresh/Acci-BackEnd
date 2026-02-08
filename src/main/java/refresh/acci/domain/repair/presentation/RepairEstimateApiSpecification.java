@@ -1,6 +1,7 @@
 package refresh.acci.domain.repair.presentation;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,9 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
+import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse;
 import refresh.acci.domain.user.model.CustomUserDetails;
+import refresh.acci.global.common.PageResponse;
 import refresh.acci.global.exception.ErrorResponseEntity;
 
 import java.util.UUID;
@@ -88,4 +92,40 @@ public interface RepairEstimateApiSpecification {
                                             """)))
             })
     ResponseEntity<RepairEstimateResponse> getEstimate(@PathVariable UUID estimateId);
+
+    @Operation(
+            summary = "수리비 견적 페이징 조회",
+            description = "인증된 사용자의 수리비 견적 기록을 페이징하여 조회합니다. <br><br>" +
+                    "최신순으로 정렬되며, 기본 페이지 크기는 5개입니다. <br><br>" +
+                    "요약 정보(견적 ID, 상태, 총 견적 금액, 차량 모델, 손상 요약, 생성일)만 포함되며, " +
+                    "상세 정보는 단건 조회 API를 사용하세요. <br><br>" +
+                    "이 API는 인증이 필요하며, HttpOnly 쿠키에 저장된 Access Token이 자동으로 전송됩니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "수리비 견적 기록 조회 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = PageResponse.class))),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "인증되지 않은 사용자",
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponseEntity.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "code": 401,
+                                                "name": "JWT_ENTRY_POINT",
+                                                "message": "인증되지 않은 사용자입니다.",
+                                                "errors": null
+                                            }
+                                            """)))
+            })
+    ResponseEntity<PageResponse<RepairEstimateSummaryResponse>> getEstimates(
+            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기", example = "5")
+            @RequestParam(defaultValue = "5") int size,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
 }

@@ -3,6 +3,9 @@ package refresh.acci.domain.repair.application.facade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.repair.application.event.RepairEstimateCreatedEvent;
@@ -19,9 +22,14 @@ import refresh.acci.domain.repair.model.enums.VehicleSegment;
 import refresh.acci.domain.repair.model.enums.VehicleType;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
+import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse;
+import refresh.acci.global.common.PageResponse;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,12 +69,38 @@ public class RepairEstimateFacade {
         return RepairEstimateResponse.of(estimate, damageDetails, List.of());
     }
 
+    @Transactional(readOnly = true)
     public RepairEstimateResponse getEstimate(UUID estimateId) {
         RepairEstimate estimate = queryService.getEstimateById(estimateId);
         List<DamageDetail> damageDetails = damageDetailRepository.findByRepairEstimateId(estimateId);
         List<RepairItem> repairItems = repairItemRepository.findByRepairEstimateId(estimateId);
 
         return RepairEstimateResponse.of(estimate, damageDetails, repairItems);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<RepairEstimateSummaryResponse> getUserEstimates(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<RepairEstimate> estimatePage = queryService.getUserEstimates(userId, pageable);
+
+        //estimateId 리스트 추출
+        List<UUID> estimateIds = estimatePage.getContent().stream()
+                .map(RepairEstimate::getId)
+                .toList();
+
+        //한 번에 모든 DamageDetail 조회 후 Map으로 그룹핑
+        Map<UUID, List<DamageDetail>> damageDetailMap = damageDetailRepository
+                .findByRepairEstimateIdIn(estimateIds)
+                .stream()
+                .collect(Collectors.groupingBy(DamageDetail::getRepairEstimateId));
+
+        //RepairEstimate를 SummaryResponse로 변환
+        Page<RepairEstimateSummaryResponse> responsePage = estimatePage.map(estimate -> {
+            List<DamageDetail> damageDetails = damageDetailMap.getOrDefault(estimate.getId(), Collections.emptyList());
+            return RepairEstimateSummaryResponse.of(estimate, damageDetails);
+        });
+
+        return PageResponse.of(responsePage);
     }
 
     //차량 정보 생성

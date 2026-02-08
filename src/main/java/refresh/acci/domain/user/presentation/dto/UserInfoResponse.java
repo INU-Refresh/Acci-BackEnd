@@ -4,26 +4,20 @@ import lombok.Builder;
 import lombok.Getter;
 import refresh.acci.domain.user.model.User;
 
-import java.util.List;
-
 @Getter
 @Builder
-public class MyPageResponse {
+public class UserInfoResponse {
     private final String name;
     private final String email;
     private final String profileImage;
     private final String role;
-    private final List<RecentAnalysisResponse> recentAnalyses;
-    private final List<RecentRepairEstimateResponse> recentRepairEstimates;
 
-    public static MyPageResponse of(User user, List<RecentAnalysisResponse> recentAnalyses, List<RecentRepairEstimateResponse> recentRepairEstimates) {
-        return MyPageResponse.builder()
+    public static UserInfoResponse from(User user) {
+        return UserInfoResponse.builder()
                 .name(user.getName())
                 .email(user.getEmail())
                 .profileImage(user.getProfileImage())
                 .role(user.getRole().name())
-                .recentAnalyses(recentAnalyses)
-                .recentRepairEstimates(recentRepairEstimates)
                 .build();
     }
 }

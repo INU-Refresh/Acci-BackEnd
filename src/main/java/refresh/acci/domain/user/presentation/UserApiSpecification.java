@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import refresh.acci.domain.user.model.CustomUserDetails;
-import refresh.acci.domain.user.presentation.dto.MyPageResponse;
+import refresh.acci.domain.user.presentation.dto.UserInfoResponse;
 import refresh.acci.global.exception.ErrorResponseEntity;
 
 @Tag(name = "User (사용자)", description = "User (사용자) 관련 API")
@@ -30,7 +30,7 @@ public interface UserApiSpecification {
                             description = "조회 성공",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = MyPageResponse.class),
+                                    schema = @Schema(implementation = UserInfoResponse.class),
                                     examples = @ExampleObject(value = """
                                             {
                                                 "name": "홍길동",
@@ -76,7 +76,7 @@ public interface UserApiSpecification {
                             description = "사용자 정보 없음",
                             content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class)))
             })
-    ResponseEntity<MyPageResponse> getMyPage(@AuthenticationPrincipal CustomUserDetails userDetails);
+    ResponseEntity<UserInfoResponse> getMyPage(@AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
             summary = "회원 탈퇴",

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import refresh.acci.domain.user.application.facade.UserFacade;
 import refresh.acci.domain.user.model.CustomUserDetails;
-import refresh.acci.domain.user.presentation.dto.MyPageResponse;
+import refresh.acci.domain.user.presentation.dto.UserInfoResponse;
 
 
 @RestController
@@ -21,8 +21,8 @@ public class UserController implements UserApiSpecification {
     private final UserFacade userFacade;
 
     @GetMapping
-    public ResponseEntity<MyPageResponse> getMyPage(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        MyPageResponse response = userFacade.getMyPage(userDetails.getId());
+    public ResponseEntity<UserInfoResponse> getMyPage(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserInfoResponse response = userFacade.getUserInfo(userDetails.getId());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

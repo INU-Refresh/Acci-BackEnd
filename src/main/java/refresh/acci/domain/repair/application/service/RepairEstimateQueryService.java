@@ -2,6 +2,8 @@ package refresh.acci.domain.repair.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.repair.infra.persistence.RepairEstimateRepository;
@@ -9,7 +11,6 @@ import refresh.acci.domain.repair.model.RepairEstimate;
 import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -28,7 +29,7 @@ public class RepairEstimateQueryService {
                 });
     }
 
-    public List<RepairEstimate> getRecentEstimates(Long userId) {
-        return estimateRepository.findTop3ByUserIdOrderByCreatedAtDesc(userId);
+    public Page<RepairEstimate> getUserEstimates(Long userId, Pageable pageable) {
+        return estimateRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
     }
 }

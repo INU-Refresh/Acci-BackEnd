@@ -1,4 +1,4 @@
-package refresh.acci.domain.user.presentation.dto;
+package refresh.acci.domain.repair.presentation.dto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Getter
 @Builder
-public class RecentRepairEstimateResponse {
+public class RepairEstimateSummaryResponse {
     private final UUID estimateId;
     private final EstimateStatus estimateStatus;
     private final Long totalEstimate;
@@ -20,8 +20,8 @@ public class RecentRepairEstimateResponse {
     private final String damageSummary;
     private final LocalDateTime createdAt;
 
-    public static RecentRepairEstimateResponse of(RepairEstimate estimate, List<DamageDetail> damageDetails) {
-        return RecentRepairEstimateResponse.builder()
+    public static RepairEstimateSummaryResponse of(RepairEstimate estimate, List<DamageDetail> damageDetails) {
+        return RepairEstimateSummaryResponse.builder()
                 .estimateId(estimate.getId())
                 .estimateStatus(estimate.getEstimateStatus())
                 .totalEstimate(estimate.getTotalEstimatedCost())
@@ -35,13 +35,11 @@ public class RecentRepairEstimateResponse {
         if (damageDetails == null || damageDetails.isEmpty()) {
             return "손상 부위 없음";
         }
-
         if (damageDetails.size() == 1) {
             return damageDetails.get(0).getPartNameKr();
         }
-
         String firstPart = damageDetails.get(0).getPartNameKr();
         int remainingCount = damageDetails.size() - 1;
-        return String.format("%s 외 %d개 부위", firstPart, remainingCount);
+        return String.format("%s 외 %d부위", firstPart, remainingCount);
     }
 }

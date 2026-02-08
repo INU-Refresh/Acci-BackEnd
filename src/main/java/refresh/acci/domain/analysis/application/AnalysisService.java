@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,16 +14,17 @@ import refresh.acci.domain.analysis.infra.file.TempVideoStore;
 import refresh.acci.domain.analysis.infra.support.LoadingTipsProvider;
 import refresh.acci.domain.analysis.model.Analysis;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisResultResponse;
+import refresh.acci.domain.analysis.presentation.dto.res.AnalysisSummaryResponse;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisUploadResponse;
 import refresh.acci.domain.file.application.S3FileService;
 import refresh.acci.domain.user.model.CustomUserDetails;
+import refresh.acci.global.common.PageResponse;
 import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 import software.amazon.awssdk.core.exception.SdkException;
 
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -99,12 +103,6 @@ public class AnalysisService {
     }
 
     @Transactional(readOnly = true)
-    public List<AnalysisResultResponse> getUserAnalysisHistory(CustomUserDetails userDetails) {
-        List<Analysis> analyses = analysisQueryService.getUserAnalysisHistory(userDetails.getId());
-        return analyses.stream().map(AnalysisResultResponse::of).toList();
-    }
-
-    @Transactional(readOnly = true)
     public String getVideoUrl(UUID analysisId, CustomUserDetails userDetails) {
         Analysis analysis = analysisQueryService.getAnalysis(analysisId);
 
@@ -122,5 +120,13 @@ public class AnalysisService {
                 analysis.getVideoS3Key(),
                 Duration.ofMinutes(10)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<AnalysisSummaryResponse> getUserAnalyses(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Analysis> analysisPage = analysisQueryService.getUserAnalyses(userId, pageable);
+        Page<AnalysisSummaryResponse> responsePage = analysisPage.map(AnalysisSummaryResponse::from);
+        return PageResponse.of(responsePage);
     }
 }

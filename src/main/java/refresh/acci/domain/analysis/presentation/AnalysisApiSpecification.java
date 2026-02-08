@@ -1,7 +1,7 @@
 package refresh.acci.domain.analysis.presentation;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,15 +10,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisResultResponse;
+import refresh.acci.domain.analysis.presentation.dto.res.AnalysisSummaryResponse;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisUploadResponse;
 import refresh.acci.domain.user.model.CustomUserDetails;
+import refresh.acci.global.common.PageResponse;
 import refresh.acci.global.exception.ErrorResponseEntity;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Analysis (분석)", description = "Analysis (분석) 관련 API")
@@ -61,7 +63,7 @@ public interface AnalysisApiSpecification {
                                          "errors": null
                                       }
                                       """)))
-    })
+            })
     ResponseEntity<AnalysisUploadResponse> analyze(@RequestPart("video") MultipartFile file,
                                                    @AuthenticationPrincipal CustomUserDetails userDetails);
 
@@ -75,7 +77,7 @@ public interface AnalysisApiSpecification {
                             description = "SSE 구독 성공",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = SseEmitter.class)))
-    })
+            })
     SseEmitter subscribe(@PathVariable UUID analysisId);
 
     @Operation(
@@ -87,7 +89,7 @@ public interface AnalysisApiSpecification {
                             description = "랜덤 Tip 제공 성공",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = String.class)))
-    })
+            })
     ResponseEntity<String> getLoadingTips();
 
     @Operation(
@@ -116,16 +118,39 @@ public interface AnalysisApiSpecification {
     ResponseEntity<AnalysisResultResponse> getAnalysisResult(@PathVariable UUID analysisId);
 
     @Operation(
-            summary = "회원의 전체 분석 기록 조회",
-            description = "인증된 회원의 전체 영상 분석 기록을 최신순으로 조회합니다.",
+            summary = "분석 기록 페이징 조회",
+            description = "인증된 사용자의 영상 분석 기록을 페이징하여 조회합니다. <br><br>" +
+                    "최신순으로 정렬되며, 기본 페이지 크기는 5개입니다. <br><br>" +
+                    "요약 정보(분석 ID, 상태, 과실 비율, 생성일)만 포함되며, 상세 정보는 단건 조회 API를 사용하세요. <br><br>" +
+                    "이 API는 인증이 필요하며, HttpOnly 쿠키에 저장된 Access Token이 자동으로 전송됩니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "회원의 전체 분석 기록 조회 성공",
-                            content = @Content(mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = AnalysisResultResponse.class))))
+                            description = "분석 기록 조회 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = PageResponse.class))),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "인증되지 않은 사용자",
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponseEntity.class),
+                                    examples = @ExampleObject(value = """
+                                      {
+                                         "code": 401,
+                                         "name": "JWT_ENTRY_POINT",
+                                         "message": "인증되지 않은 사용자입니다.",
+                                         "errors": null
+                                      }
+                                      """)))
             })
-    ResponseEntity<List<AnalysisResultResponse>> getUserAnalysisHistory(@AuthenticationPrincipal CustomUserDetails userDetails);
+    ResponseEntity<PageResponse<AnalysisSummaryResponse>> getAnalyses(
+            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기", example = "5")
+            @RequestParam(defaultValue = "5") int size,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
 
     @Operation(
             summary = "분석 영상 URL 조회",

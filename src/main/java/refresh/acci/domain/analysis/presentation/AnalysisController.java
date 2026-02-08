@@ -11,10 +11,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import refresh.acci.domain.analysis.application.AnalysisService;
 import refresh.acci.domain.analysis.application.AnalysisSseService;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisResultResponse;
+import refresh.acci.domain.analysis.presentation.dto.res.AnalysisSummaryResponse;
 import refresh.acci.domain.analysis.presentation.dto.res.AnalysisUploadResponse;
 import refresh.acci.domain.user.model.CustomUserDetails;
+import refresh.acci.global.common.PageResponse;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -56,13 +57,18 @@ public class AnalysisController implements AnalysisApiSpecification{
         return ResponseEntity.status(HttpStatus.OK).body(analysisService.getAnalysisResult(analysisId));
     }
 
-    // 회원의 전체 분석 기록 조회
-    @GetMapping("/history")
-    public ResponseEntity<List<AnalysisResultResponse>> getUserAnalysisHistory(
+    // 영상 분석 결과 페이징 조회
+    @GetMapping
+    public ResponseEntity<PageResponse<AnalysisSummaryResponse>> getAnalyses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(analysisService.getUserAnalysisHistory(userDetails));
+        PageResponse<AnalysisSummaryResponse> response = analysisService.getUserAnalyses(
+                userDetails.getId(), page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
 
     // 분석 영상 URL 조회
     @GetMapping("/{analysisId}/video")

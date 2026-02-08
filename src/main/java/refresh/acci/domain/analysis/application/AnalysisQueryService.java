@@ -2,6 +2,8 @@ package refresh.acci.domain.analysis.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.analysis.infra.persistence.AnalysisRepository;
@@ -9,7 +11,6 @@ import refresh.acci.domain.analysis.model.Analysis;
 import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -28,11 +29,7 @@ public class AnalysisQueryService {
                 });
     }
 
-    public List<Analysis> getUserAnalysisHistory(Long userId) {
-        return analysisRepository.findAllByUserId(userId);
-    }
-
-    public List<Analysis> getRecentAnalyses(Long userId) {
-        return analysisRepository.findTop3ByUserIdOrderByCreatedAtDesc(userId);
+    public Page<Analysis> getUserAnalyses(Long userId, Pageable pageable) {
+        return analysisRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
     }
 }

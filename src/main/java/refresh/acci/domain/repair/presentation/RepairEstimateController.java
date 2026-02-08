@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import refresh.acci.domain.repair.application.facade.RepairEstimateFacade;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
+import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse;
 import refresh.acci.domain.user.model.CustomUserDetails;
+import refresh.acci.global.common.PageResponse;
 
 import java.util.UUID;
 
@@ -28,6 +30,16 @@ public class RepairEstimateController implements RepairEstimateApiSpecification{
     @GetMapping("/{repairEstimateId}")
     public ResponseEntity<RepairEstimateResponse> getEstimate(@PathVariable UUID repairEstimateId) {
         RepairEstimateResponse response = repairEstimateFacade.getEstimate(repairEstimateId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<RepairEstimateSummaryResponse>> getEstimates(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        PageResponse<RepairEstimateSummaryResponse> response = repairEstimateFacade.getUserEstimates(userDetails.getId(), page, size);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

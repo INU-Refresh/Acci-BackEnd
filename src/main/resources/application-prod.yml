@@ -85,7 +85,7 @@ openai:
   api-key: ${OPENAI_API_KEY}
   base-url: https://api.openai.com/v1
   model: gpt-5-nano
-  max-tokens: 2000
+  max-tokens: 10000
   temperature: 0.3
 
 # 애플리케이션 설정

@@ -5,7 +5,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties({
-        CookieProperties.class
+        CookieProperties.class,
+        OAuthProperties.class
 })
 public class PropertiesConfig {
 }

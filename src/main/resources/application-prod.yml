@@ -91,7 +91,11 @@ openai:
 # 애플리케이션 설정
 app:
   oauth2:
-    redirect-uri: ${FRONTEND_URL}/oauth2/redirect
+    allowed-origins:
+      - https://acci-ai.site
+      - https://www.acci-ai.site
+      - https://local.acci-ai.site:3001
+    default-origin: https://acci-ai.site
   cookie:
     secure: true
     domain: .acci-ai.site

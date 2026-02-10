@@ -17,17 +17,15 @@ import refresh.acci.global.exception.ErrorResponseEntity;
 public interface UserApiSpecification {
 
     @Operation(
-            summary = "내 정보(마이페이지) 조회",
-            description = "현재 로그인한 사용자의 프로필 정보와 최근 활동 내역을 조회합니다. <br><br>" +
-                    "**조회 데이터:** <br>" +
-                    "- **사용자 프로필**: 이름, 이메일, 프로필 이미지, 권한 <br>" +
-                    "- **최근 영상 분석**: 최신순 최대 3개 (데이터가 없으면 빈 리스트 반환) <br>" +
-                    "- **최근 수리비 견적**: 최신순 최대 3개 (데이터가 없으면 빈 리스트 반환) <br><br>" +
+            summary = "내 정보 조회 (GNB/프로필용)",
+            description = "현재 로그인한 사용자의 **기본 프로필 정보(이름, 이메일, 사진)**를 조회합니다. <br><br>" +
+                    "페이지 새로고침이나 이동 시 **상단 바(GNB)**의 프로필 사진 및 이름을 표시하기 위해 사용됩니다. <br>" +
+                    "**[참고]** 분석 기록이나 견적 내역은 포함되지 않으며, 해당 정보는 각 도메인 API를 병렬로 호출하여 조회해야 합니다. <br><br>" +
                     "인증(Access Token 쿠키)이 필요하며, 요청 시 `credentials: 'include'` 설정이 필수입니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "조회 성공",
+                            description = "내 정보 조회 성공",
                             content = @Content(
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = UserInfoResponse.class),
@@ -36,51 +34,41 @@ public interface UserApiSpecification {
                                                 "name": "홍길동",
                                                 "email": "hong@example.com",
                                                 "profileImage": "https://example.com/profile.jpg",
-                                                "role": "USER",
-                                                "recentAnalyses": [
-                                                    {
-                                                        "analysisId": "550e8400-e29b-41d4-a716-446655440000",
-                                                        "analysisStatus": "COMPLETED",
-                                                        "isCompleted": true,
-                                                        "accidentRateA": 70,
-                                                        "accidentRateB": 30,
-                                                        "createdAt": "2024-03-20T10:00:00"
-                                                    }
-                                                ],
-                                                "recentRepairEstimates": [
-                                                    {
-                                                        "estimateId": "660f8400-e29b-41d4-a716-446655440111",
-                                                        "estimateStatus": "COMPLETED",
-                                                        "totalEstimate": 1500000,
-                                                        "vehicleModel": "GV80",
-                                                        "damageSummary": "앞 범퍼 외 2개 부위",
-                                                        "createdAt": "2024-03-21T15:30:00"
-                                                    },
-                                                    {
-                                                        "estimateId": "770f8400-e29b-41d4-a716-446655440222",
-                                                        "estimateStatus": "PROCESSING",
-                                                        "totalEstimate": null,
-                                                        "vehicleModel": "Avante",
-                                                        "damageSummary": "운전석 휀더",
-                                                        "createdAt": "2024-03-22T09:00:00"
-                                                    }
-                                                ]
+                                                "role": "USER"
                                             }
                                             """))),
                     @ApiResponse(
                             responseCode = "401",
-                            description = "인증 실패",
-                            content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
+                            description = "인증 실패 (JWT 토큰 없음/만료)",
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponseEntity.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "code": 401,
+                                                "name": "JWT_ENTRY_POINT",
+                                                "message": "인증되지 않은 사용자입니다.",
+                                                "errors": null
+                                            }
+                                            """))),
                     @ApiResponse(
                             responseCode = "404",
                             description = "사용자 정보 없음",
-                            content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class)))
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponseEntity.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "code": 404,
+                                                "name": "USER_NOT_FOUND",
+                                                "message": "인증된 사용자 정보를 찾을 수 없습니다.",
+                                                "errors": null
+                                            }
+                                            """)))
             })
     ResponseEntity<UserInfoResponse> getMyPage(@AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
             summary = "회원 탈퇴",
-            description = "현재 로그인한 사용자를 논리 삭제(Soft Delete) 처리합니다. <br><br>" +
+            description = "현재 로그인한 사용자를 탈퇴(Soft Delete) 처리합니다. <br><br>" +
                     "**탈퇴 처리 프로세스:** <br>" +
                     "1. 사용자 테이블의 `deleted` 상태 변경 및 탈퇴 일시 기록 <br>" +
                     "2. 브라우저에 저장된 인증 쿠키(Access/Refresh Token) 즉시 삭제 <br>" +
@@ -93,11 +81,29 @@ public interface UserApiSpecification {
                     @ApiResponse(
                             responseCode = "401",
                             description = "인증 실패",
-                            content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponseEntity.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "code": 401,
+                                                "name": "JWT_ENTRY_POINT",
+                                                "message": "인증되지 않은 사용자입니다.",
+                                                "errors": null
+                                            }
+                                            """))),
                     @ApiResponse(
                             responseCode = "404",
                             description = "사용자 정보 없음",
-                            content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class)))
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponseEntity.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "code": 404,
+                                                "name": "USER_NOT_FOUND",
+                                                "message": "인증된 사용자 정보를 찾을 수 없습니다.",
+                                                "errors": null
+                                            }
+                                            """)))
             })
     ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response);
 }

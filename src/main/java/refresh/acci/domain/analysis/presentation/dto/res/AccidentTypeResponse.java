@@ -14,6 +14,7 @@ public record AccidentTypeResponse(
 
 ) {
     public static AccidentTypeResponse of(AccidentType accidentType) {
+        if (accidentType == null) return null;
         return new AccidentTypeResponse(
                 accidentType.getObjectType(),
                 accidentType.getPlace(),

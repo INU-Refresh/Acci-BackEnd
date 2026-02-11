@@ -15,9 +15,9 @@ public record AnalysisResultResponse(
 
         AccidentTypeResponse accident_type,
 
-        int vehicle_A_fault,
+        Long vehicle_A_fault,
 
-        int vehicle_B_fault,
+        Long vehicle_B_fault,
 
         String place,
 
@@ -38,8 +38,8 @@ public record AnalysisResultResponse(
                 analysis.getAiJobId(),
                 analysis.getUserId(),
                 AccidentTypeResponse.of(analysis.getAccidentType()),
-                analysis.getAccidentRateA().intValue(),
-                analysis.getAccidentRateB().intValue(),
+                analysis.getAccidentRateA(),
+                analysis.getAccidentRateB(),
                 analysis.getPlace(),
                 analysis.getSituation(),
                 analysis.getVehicleASituation(),

@@ -108,6 +108,8 @@ server:
 ai:
   server:
     url: ${AI_SERVER_URL}
+  max-attempts: ${AI_MAX_ATTEMPTS}
+  interval-ms: ${AI_INTERVAL_MS}
 
 cloud:
   aws:

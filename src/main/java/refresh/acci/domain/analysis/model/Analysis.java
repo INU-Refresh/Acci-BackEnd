@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 import refresh.acci.domain.analysis.model.enums.AccidentType;
 import refresh.acci.domain.analysis.model.enums.AnalysisStatus;
-import refresh.acci.domain.analysis.presentation.dto.res.AiResultResponse;
+import refresh.acci.domain.analysis.adapter.out.ai.dto.res.AiResultResponse;
 import refresh.acci.global.common.BaseTime;
 
 import java.util.UUID;

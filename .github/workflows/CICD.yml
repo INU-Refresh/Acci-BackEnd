@@ -89,6 +89,8 @@ jobs:
               -e "AI_SERVER_URL=${{ secrets.AI_SERVER_URL }}" \
               -e "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
               -e "AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" \
+              -e "AI_MAX_ATTEMPTS=${{ secrets.AI_MAX_ATTEMPTS }}" \
+              -e "AI_INTERVAL_MS=${{ secrets.AI_INTERVAL_MS }}" \
               -p "8080:8080" \
               "$IMAGE"
 

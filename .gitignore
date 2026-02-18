@@ -8,7 +8,6 @@ build/
 *.iml
 *.ipr
 *.iws
-out/
 
 ### VS Code ###
 .vscode/

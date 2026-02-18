@@ -23,11 +23,10 @@ import java.util.UUID;
 public class AnalysisController implements AnalysisApiSpecification {
 
     private final StartAnalysisUseCase startAnalysisUseCase;
-    private final SubscribeAnalysisEventsUseCase subscribeAnalysisEventsUseCase;
+    private final AnalysisEventsUseCase analysisEventsUseCase;
     private final GetLoadingTipUseCase getLoadingTipUseCase;
-    private final GetAnalysisResultUseCase getAnalysisResultUseCase;
+    private final QueryAnalysisUseCase queryAnalysisUseCase;
     private final GetVideoUrlUseCase getVideoUrlUseCase;
-    private final GetUserAnalysesUseCase getUserAnalysesUseCase;
 
     // 영상 분석 업로드
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -43,7 +42,7 @@ public class AnalysisController implements AnalysisApiSpecification {
     public SseEmitter subscribe(
             @PathVariable UUID analysisId
     ) {
-        return subscribeAnalysisEventsUseCase.subscribe(analysisId);
+        return analysisEventsUseCase.subscribe(analysisId);
     }
 
     // 랜덤 Tip 제공
@@ -58,7 +57,7 @@ public class AnalysisController implements AnalysisApiSpecification {
             @PathVariable UUID analysisId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(getAnalysisResultUseCase.getAnalysisResult(analysisId, userDetails));
+        return ResponseEntity.status(HttpStatus.OK).body(queryAnalysisUseCase.getAnalysisResult(analysisId, userDetails));
     }
 
     // 영상 분석 결과 페이징 조회
@@ -68,7 +67,7 @@ public class AnalysisController implements AnalysisApiSpecification {
             @RequestParam(defaultValue = "5") int size,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PageResponse<AnalysisSummaryResponse> response = getUserAnalysesUseCase.getUserAnalyses(
+        PageResponse<AnalysisSummaryResponse> response = queryAnalysisUseCase.getUserAnalyses(
                 userDetails.getId(), page, size);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

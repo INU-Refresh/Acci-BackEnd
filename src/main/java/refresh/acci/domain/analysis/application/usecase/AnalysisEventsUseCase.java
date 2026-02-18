@@ -11,7 +11,7 @@ import refresh.acci.domain.analysis.model.Analysis;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SubscribeAnalysisEventsUseCase {
+public class AnalysisEventsUseCase {
 
     private final AnalysisEventPort analysisEvent;
     private final AnalysisRepositoryPort analysisRepository;

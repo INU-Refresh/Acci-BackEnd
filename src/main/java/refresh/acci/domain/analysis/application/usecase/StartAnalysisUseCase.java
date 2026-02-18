@@ -27,7 +27,7 @@ public class StartAnalysisUseCase {
     private final VideoStoragePort videoStorage;
     private final TaskExecutorPort executor;
     private final AnalysisEventPort analysisEvent;
-    private final RunAnalysisUseCase runAnalysisUseCase;
+    private final ProcessAnalysisAIJobUseCase runAnalysisUseCase;
 
     @Transactional
     public AnalysisUploadResponse startAnalysis(MultipartFile video, CustomUserDetails userDetails) {

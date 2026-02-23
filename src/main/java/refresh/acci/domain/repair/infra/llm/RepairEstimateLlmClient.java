@@ -133,6 +133,8 @@ public class RepairEstimateLlmClient {
                         return new CustomException(ErrorCode.LLM_RESPONSE_PARSE_FAILED);
                     });
 
+            log.info("LLM content raw: {}", content);
+
             //content(JSON 문자열)를 RepairEstimateLlmResponse 객체로 변환
             return objectMapper.readValue(content, RepairEstimateLlmResponse.class);
 

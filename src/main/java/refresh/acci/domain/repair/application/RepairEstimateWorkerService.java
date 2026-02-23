@@ -59,6 +59,7 @@ public class RepairEstimateWorkerService {
 
             //LLM 호출
             RepairEstimateLlmResponse llmResponse = callLlm(estimate.getVehicleInfo(), damageDetails, estimate.getUserDescription(), imageBase64);
+            log.info("LLM response repairItems: {}", llmResponse.getRepairItems());
 
             //RepairItem 저장
             saveRepairItems(estimateId, llmResponse.getRepairItems());

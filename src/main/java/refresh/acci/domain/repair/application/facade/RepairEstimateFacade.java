@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import refresh.acci.domain.repair.application.event.RepairEstimateCreatedEvent;
 import refresh.acci.domain.repair.application.service.RepairEstimateCommandService;
 import refresh.acci.domain.repair.application.service.RepairEstimateQueryService;
@@ -24,6 +25,7 @@ import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse;
 import refresh.acci.global.common.PageResponse;
+import refresh.acci.global.util.S3FileService;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +43,7 @@ public class RepairEstimateFacade {
     private final DamageDetailRepository damageDetailRepository;
     private final RepairItemRepository repairItemRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final S3FileService s3FileService;
 
     /**
      * 수리비 견적 생성
@@ -50,13 +53,18 @@ public class RepairEstimateFacade {
      * 4. 비동기 견적 처리 이벤트 발행
      */
     @Transactional
-    public RepairEstimateResponse createEstimate(RepairEstimateRequest request, Long userId) {
+    public RepairEstimateResponse createEstimate(RepairEstimateRequest request, MultipartFile image, Long userId) {
         //차량 정보 생성
         VehicleInfo vehicleInfo = buildVehicleInfo(request);
 
         //RepairEstimate Entity 정보 생성 및 저장
         RepairEstimate estimate = RepairEstimate.of(userId, vehicleInfo, request.getUserDescription());
         estimate = commandService.createEstimate(estimate);
+
+        //이미지 S3 업로드
+        if (image != null && !image.isEmpty()) {
+            uploadImage(estimate, image);
+        }
 
         //DamageDetail Entity 생성 및 저장
         List<DamageDetail> damageDetails = commandService.saveDamageDetails(estimate.getId(), request.getDamages());
@@ -102,6 +110,14 @@ public class RepairEstimateFacade {
 
         return PageResponse.of(responsePage);
     }
+
+    //이미지 S3 업로드 후 엔티티에 S3 키 저장
+    private void uploadImage(RepairEstimate estimate, MultipartFile image) {
+        String s3Key = s3FileService.uploadMultipartFile("repair-estimate/" + estimate.getId(), image);
+        estimate.attachImageS3Key(s3Key);
+        log.info("이미지 S3 업로드 완료 - estimateId: {}, s3Key: {}", estimate.getId(), s3Key);
+    }
+
 
     //차량 정보 생성
     private VehicleInfo buildVehicleInfo(RepairEstimateRequest request) {

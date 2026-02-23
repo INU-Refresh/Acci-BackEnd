@@ -24,7 +24,35 @@ public class OpenAiRequest {
 
     private Double temperature;
 
-    public record Message(String role, String content) {}
+    public record Message(String role, Object content) {}
 
     public record ResponseFormat(String type) {}
+
+    @Getter
+    @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class ContentPart {
+        private String type;        //"text" or "image_url"
+
+        private String text;        //type이 text
+
+        @JsonProperty("image_url")
+        private ImageUrl imageUrl;  //type이 image_url
+
+        public static ContentPart ofText(String text) {
+            return ContentPart.builder()
+                    .type("text")
+                    .text(text)
+                    .build();
+        }
+
+        public static ContentPart ofImage(String base64, String mediaType) {
+            return ContentPart.builder()
+                    .type("image_url")
+                    .imageUrl(new ImageUrl("data:" + mediaType + ";base64," + base64))
+                    .build();
+        }
+    }
+
+    public record ImageUrl(String url) {}
 }

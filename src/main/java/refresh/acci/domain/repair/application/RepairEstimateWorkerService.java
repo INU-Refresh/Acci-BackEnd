@@ -17,7 +17,13 @@ import refresh.acci.domain.repair.model.RepairItem;
 import refresh.acci.domain.repair.model.enums.RepairMethod;
 import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
+import refresh.acci.global.util.S3FileService;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.time.Duration;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,11 +32,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RepairEstimateWorkerService {
 
+    private static final Duration PRESIGNED_URL_TTL = Duration.ofMinutes(5);
+
     private final RepairEstimateRepository estimateRepository;
     private final DamageDetailRepository damageDetailRepository;
     private final RepairItemRepository repairItemRepository;
     private final RepairEstimateLlmClient llmClient;
     private final RepairPromptBuilder promptBuilder;
+    private final S3FileService s3FileService;
 
     @Transactional
     public void processEstimate(UUID estimateId) {
@@ -45,8 +54,11 @@ public class RepairEstimateWorkerService {
             //DamageDetail 조회
             List<DamageDetail> damageDetails = damageDetailRepository.findByRepairEstimateId(estimateId);
 
+            //이미지 base64 변환
+            String imageBase64 = resolveImageBase64(estimate.getImageS3Key());
+
             //LLM 호출
-            RepairEstimateLlmResponse llmResponse = callLlm(estimate.getVehicleInfo(), damageDetails, estimate.getUserDescription());
+            RepairEstimateLlmResponse llmResponse = callLlm(estimate.getVehicleInfo(), damageDetails, estimate.getUserDescription(), imageBase64);
 
             //RepairItem 저장
             saveRepairItems(estimateId, llmResponse.getRepairItems());
@@ -66,6 +78,22 @@ public class RepairEstimateWorkerService {
         }
     }
 
+    //S3 키가 있으면 presigned URL -> 이미지 다운로드 -> base64 변환
+    private String resolveImageBase64(String imageS3Key) {
+        if (imageS3Key == null || imageS3Key.isBlank()) return null;
+
+        try {
+            String presignedUrl = s3FileService.generatePresignedUrl(imageS3Key, PRESIGNED_URL_TTL);
+            try (InputStream inputStream = URI.create(presignedUrl).toURL().openStream()) {
+                byte[] imageBytes = inputStream.readAllBytes();
+                return Base64.getEncoder().encodeToString(imageBytes);
+            }
+        } catch (IOException e) {
+            log.warn("이미지 다운로드 실패 - s3Key: {}, 텍스트만으로 LLM 호출 진행", imageS3Key, e);
+            return null;
+        }
+    }
+
     //RepairEstimate 조회
     private RepairEstimate getEstimateById(UUID estimateId) {
         return estimateRepository.findById(estimateId)
@@ -76,7 +104,7 @@ public class RepairEstimateWorkerService {
     }
 
     //LLM 호출
-    private RepairEstimateLlmResponse callLlm(refresh.acci.domain.repair.model.VehicleInfo vehicleInfo, List<DamageDetail> damageDetails, String userDescription) {
+    private RepairEstimateLlmResponse callLlm(refresh.acci.domain.repair.model.VehicleInfo vehicleInfo, List<DamageDetail> damageDetails, String userDescription, String imageBase64) {
 
         //LLM 요청 DTO 생성
         RepairEstimateLlmRequest llmRequest = promptBuilder.toLlmRequest(vehicleInfo, damageDetails, userDescription);
@@ -88,7 +116,7 @@ public class RepairEstimateWorkerService {
         String userPrompt = promptBuilder.buildUserPrompt(llmRequest);
 
         //LLM Client 호출
-        return llmClient.call(systemMessage, userPrompt);
+        return llmClient.call(systemMessage, userPrompt, imageBase64);
     }
 
     //RepairItem Entity 저장

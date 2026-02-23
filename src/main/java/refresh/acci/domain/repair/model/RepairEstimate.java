@@ -32,6 +32,9 @@ public class RepairEstimate extends BaseTime {
     @Column(name = "user_description", length = 1000)
     private String userDescription;
 
+    @Column(name = "image_s3_key")
+    private String imageS3Key;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estimate_status", nullable = false)
     private EstimateStatus estimateStatus;
@@ -53,6 +56,10 @@ public class RepairEstimate extends BaseTime {
                 .vehicleInfo(vehicleInfo)
                 .userDescription(userDescription)
                 .build();
+    }
+
+    public void attachImageS3Key(String imageS3Key) {
+        this.imageS3Key = imageS3Key;
     }
 
     public void startProcessing() {

@@ -3,6 +3,7 @@ package refresh.acci.domain.repair.presentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,7 +33,10 @@ public interface RepairEstimateApiSpecification {
                     "LLM이 각 부위별 수리 방법과 비용을 분석하여 총 견적을 제공합니다. <br><br>" +
                     "이미지는 선택 사항이며, 첨부 시 LLM이 이미지를 추가 참고자료로 활용합니다.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            encoding = @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE)
+                    )
             ),
             responses = {
                     @ApiResponse(

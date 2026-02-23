@@ -51,8 +51,8 @@ public class RepairEstimateLlmClient {
     }
 
     //penAI API를 호출하여 수리비 견적을 생성
-    public RepairEstimateLlmResponse call(String systemMessage, String userPrompt) {
-        OpenAiRequest requestBody = buildRequestBody(systemMessage, userPrompt);
+    public RepairEstimateLlmResponse call(String systemMessage, String userPrompt, String imageBase64) {
+        OpenAiRequest requestBody = buildRequestBody(systemMessage, userPrompt, imageBase64);
 
         try {
             String responseString = webClient.post()
@@ -84,12 +84,14 @@ public class RepairEstimateLlmClient {
     }
 
     //OpenAI 요청 바디 생성
-    private OpenAiRequest buildRequestBody(String systemMessage, String userPrompt) {
+    private OpenAiRequest buildRequestBody(String systemMessage, String userPrompt, String imageBase64) {
+        OpenAiRequest.Message userMessage = buildUserMessage(userPrompt, imageBase64);
+
         return OpenAiRequest.builder()
                 .model(model)
                 .messages(List.of(
                         new OpenAiRequest.Message(SYSTEM_ROLE, systemMessage),
-                        new OpenAiRequest.Message(USER_ROLE, userPrompt)
+                        userMessage
                 ))
                 .responseFormat(new OpenAiRequest.ResponseFormat(JSON_RESPONSE_TYPE))
                 .maxCompletionTokens(maxTokens)
@@ -97,6 +99,21 @@ public class RepairEstimateLlmClient {
                 .temperature(temperature) 일부 모델에서 변경 불가 -> 기본값 사용
                 */
                 .build();
+    }
+
+    //이미지 유무에 따라 user 메시지 구성
+    private OpenAiRequest.Message buildUserMessage(String userPrompt, String imageBase64) {
+        //텍스트만
+        if (imageBase64 == null) {
+            return new OpenAiRequest.Message(USER_ROLE, userPrompt);
+        }
+
+        //텍스트 + 이미지 배열
+        List<OpenAiRequest.ContentPart> contentParts = List.of(
+                OpenAiRequest.ContentPart.ofText(userPrompt),
+                OpenAiRequest.ContentPart.ofImage(imageBase64, "image/jpeg")
+        );
+        return new OpenAiRequest.Message(USER_ROLE, contentParts);
     }
 
     //OpenAI 응답 파싱

@@ -13,9 +13,6 @@ public class RepairEstimateLlmResponse {
     @JsonProperty("repair_items")
     private List<RepairItem> repairItems;
 
-    @JsonProperty("total_cost")
-    private Long totalCost;
-
 
     @Getter
     @NoArgsConstructor

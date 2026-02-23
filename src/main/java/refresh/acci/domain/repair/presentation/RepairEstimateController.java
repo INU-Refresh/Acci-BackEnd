@@ -2,9 +2,11 @@ package refresh.acci.domain.repair.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import refresh.acci.domain.repair.application.facade.RepairEstimateFacade;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
@@ -21,9 +23,13 @@ public class RepairEstimateController implements RepairEstimateApiSpecification{
 
     private final RepairEstimateFacade repairEstimateFacade;
 
-    @PostMapping
-    public ResponseEntity<RepairEstimateResponse> createEstimate(@RequestBody RepairEstimateRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        RepairEstimateResponse response = repairEstimateFacade.createEstimate(request, userDetails.getId());
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<RepairEstimateResponse> createEstimate(
+            @RequestPart("request") RepairEstimateRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        RepairEstimateResponse response = repairEstimateFacade.createEstimate(request, image, userDetails.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

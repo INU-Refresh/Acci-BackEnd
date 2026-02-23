@@ -22,25 +22,24 @@ public class RepairPromptBuilder {
     //시스템 메시지 생성
     public String buildSystemMessage() {
         return """
-            당신은 자동차 수리비 견적 전문가입니다.
-            차량 정보와 손상 내역을 분석하여 정확한 수리비를 산출해야 합니다.
-            
-            응답은 반드시 JSON 형식으로 작성하세요.
-            한국 시장 기준 수리비를 반영하세요.
-            각 부위별로 수리 방법(replace/repair/paint/repair_and_paint)과 비용을 명시하세요.
-            
-            응답 JSON 형식:
+        당신은 자동차 수리비 견적 전문가입니다.
+        차량 정보와 손상 내역을 분석하여 정확한 수리비를 산출해야 합니다.
+        
+        응답은 반드시 JSON 형식으로 작성하세요.
+        한국 시장 기준 수리비를 반영하세요.
+        각 부위별로 수리 방법(replace/repair/paint/repair_and_paint)과 비용을 명시하세요.
+        
+        응답 JSON 형식:
+        {
+          "repair_items": [
             {
-              "repair_items": [
-                {
-                  "part_name": "부위명",
-                  "repair_method": "replace|repair|paint|repair_and_paint",
-                  "cost": 수리비(숫자)
-                }
-              ],
-              "total_estimate": 총견적(숫자)
+              "part_name": "부위명",
+              "repair_method": "replace|repair|paint|repair_and_paint",
+              "cost": 수리비(숫자)
             }
-            """;
+          ]
+        }
+        """;
     }
 
     //사용자 프롬프트 생성, RepairEstimateLlmRequest 객체를 JSON으로 변환

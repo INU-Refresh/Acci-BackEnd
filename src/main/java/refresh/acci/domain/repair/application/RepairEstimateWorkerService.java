@@ -51,10 +51,14 @@ public class RepairEstimateWorkerService {
             //RepairItem 저장
             saveRepairItems(estimateId, llmResponse.getRepairItems());
 
-            //COMPLETED 상태로 변경
-            estimate.completeEstimate(llmResponse.getTotalCost());
+            //총 금액 계산
+            long totalCost = llmResponse.getRepairItems().stream()
+                    .mapToLong(RepairEstimateLlmResponse.RepairItem::getCost)
+                    .sum();
 
-            log.info("수리비 견적 처리 완료 - estimateId: {}, totalEstimate: {}", estimateId, llmResponse.getTotalCost());
+            //COMPLETED 상태로 변경
+            estimate.completeEstimate(totalCost);
+            log.info("수리비 견적 처리 완료 - estimateId: {}, totalEstimate: {}", estimateId, totalCost);
 
         } catch (Exception e) {
             log.error("수리비 견적 처리 실패 - estimateId: {}", estimateId, e);

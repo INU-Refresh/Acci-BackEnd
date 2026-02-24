@@ -79,6 +79,9 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        /*
+                        .requestMatchers(MONITORING_ENDPOINTS).hasIpAddress("172.16.0.0/12")
+                         */
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(AUTHENTICATED_ENDPOINTS).authenticated()
                         .anyRequest().authenticated()
@@ -113,7 +116,10 @@ public class SecurityConfig {
             "/api/v1/auth/refresh",
 
             //사고 영상 분석
-            "/api/v1/analyses/loading"
+            "/api/v1/analyses/loading",
+
+            //Actuator(로드밸런서용)
+            "/actuator/health"
     };
 
     private static final String[] AUTHENTICATED_ENDPOINTS = {
@@ -126,5 +132,10 @@ public class SecurityConfig {
 
             //수리비 견적
             "/api/v1/repair-estimates/**"
+    };
+
+    private static final String[] MONITORING_ENDPOINTS = {
+            "/actuator/prometheus",
+            "/actuator/metrics"
     };
 }

@@ -33,7 +33,8 @@ public class RepairEstimateCommandService {
                         repairEstimateId,
                         dto.getPartNameKr(),
                         dto.getPartNameEn(),
-                        DamageSeverity.from(dto.getDamageSeverity())
+                        DamageSeverity.from(dto.getDamageSeverity()),
+                        dto.getUserDescription()
                 ))
                 .toList();
         return damageDetailRepository.saveAll(damageDetails);

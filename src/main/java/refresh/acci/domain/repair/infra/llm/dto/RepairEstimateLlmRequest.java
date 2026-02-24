@@ -16,9 +16,6 @@ public class RepairEstimateLlmRequest {
     @JsonProperty("damage_details")
     private List<DamageDetail> damageDetails;
 
-    @JsonProperty("user_description")
-    private String userDescription;
-
     @Getter
     @Builder
     public static class VehicleInfo {
@@ -43,5 +40,8 @@ public class RepairEstimateLlmRequest {
 
         @JsonProperty("damage_severity")
         private String damageSeverity;
+
+        @JsonProperty("user_description")
+        private String userDescription;
     }
 }

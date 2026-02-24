@@ -14,6 +14,7 @@ import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -51,8 +52,8 @@ public class RepairEstimateLlmClient {
     }
 
     //penAI API를 호출하여 수리비 견적을 생성
-    public RepairEstimateLlmResponse call(String systemMessage, String userPrompt, String imageBase64) {
-        OpenAiRequest requestBody = buildRequestBody(systemMessage, userPrompt, imageBase64);
+    public RepairEstimateLlmResponse call(String systemMessage, String userPrompt, List<String> imagesBase64) {
+        OpenAiRequest requestBody = buildRequestBody(systemMessage, userPrompt, imagesBase64);
 
         try {
             String responseString = webClient.post()
@@ -84,8 +85,8 @@ public class RepairEstimateLlmClient {
     }
 
     //OpenAI 요청 바디 생성
-    private OpenAiRequest buildRequestBody(String systemMessage, String userPrompt, String imageBase64) {
-        OpenAiRequest.Message userMessage = buildUserMessage(userPrompt, imageBase64);
+    private OpenAiRequest buildRequestBody(String systemMessage, String userPrompt, List<String> imagesBase64) {
+        OpenAiRequest.Message userMessage = buildUserMessage(userPrompt, imagesBase64);
 
         return OpenAiRequest.builder()
                 .model(model)
@@ -102,17 +103,18 @@ public class RepairEstimateLlmClient {
     }
 
     //이미지 유무에 따라 user 메시지 구성
-    private OpenAiRequest.Message buildUserMessage(String userPrompt, String imageBase64) {
-        //텍스트만
-        if (imageBase64 == null) {
+    private OpenAiRequest.Message buildUserMessage(String userPrompt, List<String> imagesBase64) {
+        //이미지 없으면 텍스트만
+        if (imagesBase64 == null || imagesBase64.isEmpty()) {
             return new OpenAiRequest.Message(USER_ROLE, userPrompt);
         }
 
         //텍스트 + 이미지 배열
-        List<OpenAiRequest.ContentPart> contentParts = List.of(
-                OpenAiRequest.ContentPart.ofText(userPrompt),
-                OpenAiRequest.ContentPart.ofImage(imageBase64, "image/jpeg")
-        );
+        List<OpenAiRequest.ContentPart> contentParts = new ArrayList<>();
+        contentParts.add(OpenAiRequest.ContentPart.ofText(userPrompt));
+        imagesBase64.forEach(imageBase64 ->
+                contentParts.add(OpenAiRequest.ContentPart.ofImage(imageBase64, "image/jpeg")));
+
         return new OpenAiRequest.Message(USER_ROLE, contentParts);
     }
 

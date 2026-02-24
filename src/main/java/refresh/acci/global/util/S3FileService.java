@@ -17,6 +17,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +43,7 @@ public class S3FileService {
     public String uploadMultipartFile(String prefix, MultipartFile file) {
         try {
             String ext = extractExtension(file.getOriginalFilename());
-            String s3Key = prefix + "/image." + ext;
+            String s3Key = prefix + "/" + UUID.randomUUID() + "." + ext;
 
             s3Client.putObject(
                     PutObjectRequest.builder()

@@ -57,7 +57,8 @@ public enum ErrorCode {
     LLM_RESPONSE_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "LLM 응답 파싱에 실패했습니다."),
     INVALID_VEHICLE_YEAR(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 연식입니다."),
     DAMAGE_DETAILS_REQUIRED(HttpStatus.BAD_REQUEST, 400, "파손 부위 정보가 필요합니다."),
-    TOO_MANY_DAMAGE_DETAILS(HttpStatus.BAD_REQUEST, 400, "파손 부위는 최대 20개까지 입력 가능합니다.")
+    TOO_MANY_DAMAGE_DETAILS(HttpStatus.BAD_REQUEST, 400, "파손 부위는 최대 20개까지 입력 가능합니다."),
+    REPAIR_ESTIMATE_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST,400, "이미지는 최대 5장까지 업로드 가능합니다."),
 
     ;
 

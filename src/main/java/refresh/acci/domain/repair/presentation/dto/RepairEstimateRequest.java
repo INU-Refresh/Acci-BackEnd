@@ -17,13 +17,12 @@ public class RepairEstimateRequest {
 
     private List<DamageDto> damages;
 
-    private String userDescription;
-
     @Getter
     @NoArgsConstructor
     public static class DamageDto {
         private String partNameKr;
         private String partNameEn;
         private String damageSeverity;
+        private String userDescription;
     }
 }

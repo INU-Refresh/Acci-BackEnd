@@ -53,11 +53,10 @@ public class RepairPromptBuilder {
     }
 
     //엔티티를 LLM요청 DTO로 변환
-    public RepairEstimateLlmRequest toLlmRequest(VehicleInfo vehicleInfo, List<DamageDetail> damageDetails, String userDescription) {
+    public RepairEstimateLlmRequest toLlmRequest(VehicleInfo vehicleInfo, List<DamageDetail> damageDetails) {
         return RepairEstimateLlmRequest.builder()
                 .vehicleInfo(buildVehicleInfoDto(vehicleInfo))
                 .damageDetails(buildDamageDetailDtos(damageDetails))
-                .userDescription(userDescription)
                 .build();
     }
 
@@ -79,6 +78,7 @@ public class RepairPromptBuilder {
                         .partNameEn(damage.getPartNameEn())
                         .partNameKr(damage.getPartNameKr())
                         .damageSeverity(damage.getDamageSeverity().getCode())
+                        .userDescription(damage.getUserDescription())
                         .build())
                 .toList();
     }

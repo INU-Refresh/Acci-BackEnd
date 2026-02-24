@@ -17,11 +17,11 @@ public class RepairEstimateResponse {
 
     private final UUID estimateId;
     private final VehicleInfoDto vehicleInfo;
+    private final List<String> images;
     private final List<DamageDetailDto> damageDetails;
     private final List<RepairItemDto> repairItems;
     private final Long totalEstimate;
     private final String status;
-    private final String userDescription;
     private final LocalDateTime createdAt;
 
 
@@ -29,6 +29,7 @@ public class RepairEstimateResponse {
         return RepairEstimateResponse.builder()
                 .estimateId(estimate.getId())
                 .vehicleInfo(VehicleInfoDto.from(estimate.getVehicleInfo()))
+                .images()
                 .damageDetails(damageDetails.stream()
                         .map(DamageDetailDto::from)
                         .toList())
@@ -37,7 +38,6 @@ public class RepairEstimateResponse {
                         .toList())
                 .totalEstimate(estimate.getTotalEstimatedCost())
                 .status(estimate.getEstimateStatus().name())
-                .userDescription(estimate.getUserDescription())
                 .createdAt(estimate.getCreatedAt())
                 .build();
     }
@@ -68,12 +68,14 @@ public class RepairEstimateResponse {
         private final String partNameKr;
         private final String partNameEn;
         private final String damageSeverity;
+        private final String userDescription;
 
         public static DamageDetailDto from(DamageDetail damage) {
             return DamageDetailDto.builder()
                     .partNameKr(damage.getPartNameKr())
                     .partNameEn(damage.getPartNameEn())
                     .damageSeverity(damage.getDamageSeverity().getDisplayName())
+                    .userDescription(damage.getUserDescription())
                     .build();
         }
     }

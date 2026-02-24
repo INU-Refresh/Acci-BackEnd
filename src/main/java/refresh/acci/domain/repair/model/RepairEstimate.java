@@ -8,7 +8,12 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 import refresh.acci.domain.repair.model.enums.EstimateStatus;
 import refresh.acci.global.common.BaseTime;
+import refresh.acci.global.common.StringListConverter;
+import refresh.acci.global.exception.CustomException;
+import refresh.acci.global.exception.ErrorCode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -29,8 +34,9 @@ public class RepairEstimate extends BaseTime {
     @Embedded
     private VehicleInfo vehicleInfo;
 
-    @Column(name = "image_s3_key")
-    private String imageS3Key;
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "image_s3_keys", columnDefinition = "JSON")
+    private List<String> imageS3Keys = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estimate_status", nullable = false)
@@ -53,8 +59,12 @@ public class RepairEstimate extends BaseTime {
                 .build();
     }
 
-    public void attachImageS3Key(String imageS3Key) {
-        this.imageS3Key = imageS3Key;
+    public void attachImageS3Keys(List<String> s3Keys) {
+        if (s3Keys == null || s3Keys.isEmpty()) return;
+        if (this.imageS3Keys.size() + s3Keys.size() > 5) {
+            throw new CustomException(ErrorCode.REPAIR_ESTIMATE_IMAGE_LIMIT_EXCEEDED);
+        }
+        this.imageS3Keys.addAll(s3Keys);
     }
 
     public void startProcessing() {

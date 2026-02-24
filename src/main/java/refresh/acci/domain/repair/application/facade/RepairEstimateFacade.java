@@ -53,7 +53,7 @@ public class RepairEstimateFacade {
      * 4. 비동기 견적 처리 이벤트 발행
      */
     @Transactional
-    public RepairEstimateResponse createEstimate(RepairEstimateRequest request, MultipartFile image, Long userId) {
+    public RepairEstimateResponse createEstimate(RepairEstimateRequest request, List<MultipartFile> images, Long userId) {
         //차량 정보 생성
         VehicleInfo vehicleInfo = buildVehicleInfo(request);
 
@@ -62,8 +62,8 @@ public class RepairEstimateFacade {
         estimate = commandService.createEstimate(estimate);
 
         //이미지 S3 업로드
-        if (image != null && !image.isEmpty()) {
-            uploadImage(estimate, image);
+        if (images != null && !images.isEmpty()) {
+            uploadImages(estimate, images);
         }
 
         //DamageDetail Entity 생성 및 저장
@@ -112,10 +112,14 @@ public class RepairEstimateFacade {
     }
 
     //이미지 S3 업로드 후 엔티티에 S3 키 저장
-    private void uploadImage(RepairEstimate estimate, MultipartFile image) {
-        String s3Key = s3FileService.uploadMultipartFile("repair-estimate/" + estimate.getId(), image);
-        estimate.attachImageS3Key(s3Key);
-        log.info("이미지 S3 업로드 완료 - estimateId: {}, s3Key: {}", estimate.getId(), s3Key);
+    private void uploadImages(RepairEstimate estimate, List<MultipartFile> images) {
+        List<String> s3Keys = images.stream()
+                .filter(image -> image != null && !image.isEmpty())
+                .map(image -> s3FileService.uploadMultipartFile("repair-estimate/" + estimate.getId(), image))
+                .toList();
+
+        estimate.attachImageS3Keys(s3Keys);
+        log.info("이미지 S3 업로드 완료 - estimateId: {}, s3Keys: {}", estimate.getId(), s3Keys);
     }
 
 

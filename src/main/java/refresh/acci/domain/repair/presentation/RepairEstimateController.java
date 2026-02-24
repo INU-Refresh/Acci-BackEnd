@@ -14,6 +14,7 @@ import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse
 import refresh.acci.domain.user.model.CustomUserDetails;
 import refresh.acci.global.common.PageResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,10 +27,10 @@ public class RepairEstimateController implements RepairEstimateApiSpecification{
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RepairEstimateResponse> createEstimate(
             @RequestPart("request") RepairEstimateRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        RepairEstimateResponse response = repairEstimateFacade.createEstimate(request, image, userDetails.getId());
+        RepairEstimateResponse response = repairEstimateFacade.createEstimate(request, images, userDetails.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

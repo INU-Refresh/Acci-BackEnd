@@ -21,12 +21,14 @@ import refresh.acci.domain.repair.model.VehicleInfo;
 import refresh.acci.domain.repair.model.enums.VehicleBrand;
 import refresh.acci.domain.repair.model.enums.VehicleSegment;
 import refresh.acci.domain.repair.model.enums.VehicleType;
+import refresh.acci.domain.repair.presentation.dto.RepairEstimateCreateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse;
 import refresh.acci.global.common.PageResponse;
 import refresh.acci.global.util.S3FileService;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +55,7 @@ public class RepairEstimateFacade {
      * 4. 비동기 견적 처리 이벤트 발행
      */
     @Transactional
-    public RepairEstimateResponse createEstimate(RepairEstimateRequest request, List<MultipartFile> images, Long userId) {
+    public RepairEstimateCreateResponse createEstimate(RepairEstimateRequest request, List<MultipartFile> images, Long userId) {
         //차량 정보 생성
         VehicleInfo vehicleInfo = buildVehicleInfo(request);
 
@@ -67,14 +69,14 @@ public class RepairEstimateFacade {
         }
 
         //DamageDetail Entity 생성 및 저장
-        List<DamageDetail> damageDetails = commandService.saveDamageDetails(estimate.getId(), request.getDamages());
+        commandService.saveDamageDetails(estimate.getId(), request.getDamages());
 
         //비동기로 견적 처리(이벤트 발행)
         eventPublisher.publishEvent(new RepairEstimateCreatedEvent(estimate.getId()));
 
         log.info("수리비 견적 요청 생성 - estimateId: {}, userId: {}", estimate.getId(), userId);
 
-        return RepairEstimateResponse.of(estimate, damageDetails, List.of());
+        return RepairEstimateCreateResponse.from(estimate);
     }
 
     @Transactional(readOnly = true)
@@ -82,8 +84,9 @@ public class RepairEstimateFacade {
         RepairEstimate estimate = queryService.getEstimateById(estimateId);
         List<DamageDetail> damageDetails = damageDetailRepository.findByRepairEstimateId(estimateId);
         List<RepairItem> repairItems = repairItemRepository.findByRepairEstimateId(estimateId);
+        List<String> imageUrls = resolveImageUrls(estimate.getImageS3Keys());
 
-        return RepairEstimateResponse.of(estimate, damageDetails, repairItems);
+        return RepairEstimateResponse.of(estimate, damageDetails, repairItems, imageUrls);
     }
 
     @Transactional(readOnly = true)
@@ -122,6 +125,13 @@ public class RepairEstimateFacade {
         log.info("이미지 S3 업로드 완료 - estimateId: {}, s3Keys: {}", estimate.getId(), s3Keys);
     }
 
+    //이미지 presigned url로 가져오기
+    private List<String> resolveImageUrls(List<String> imageS3Keys) {
+        if (imageS3Keys == null || imageS3Keys.isEmpty()) return List.of();
+        return imageS3Keys.stream()
+                .map(key -> s3FileService.generatePresignedUrl(key, Duration.ofMinutes(30)))
+                .toList();
+    }
 
     //차량 정보 생성
     private VehicleInfo buildVehicleInfo(RepairEstimateRequest request) {

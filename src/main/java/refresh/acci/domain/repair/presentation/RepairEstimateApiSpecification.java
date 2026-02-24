@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import refresh.acci.domain.repair.presentation.dto.RepairEstimateCreateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse;
@@ -22,6 +23,7 @@ import refresh.acci.domain.user.model.CustomUserDetails;
 import refresh.acci.global.common.PageResponse;
 import refresh.acci.global.exception.ErrorResponseEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Repair Estimate (수리비 견적)", description = "수리비 견적 관련 API")
@@ -31,7 +33,7 @@ public interface RepairEstimateApiSpecification {
             summary = "수리비 견적 요청",
             description = "차량 정보와 손상 내역을 바탕으로 AI가 수리비 견적을 산출합니다. <br><br>" +
                     "LLM이 각 부위별 수리 방법과 비용을 분석하여 총 견적을 제공합니다. <br><br>" +
-                    "이미지는 선택 사항이며, 첨부 시 LLM이 이미지를 추가 참고자료로 활용합니다.",
+                    "이미지는 선택 사항이며, 최대 5장까지 첨부 가능하고 첨부 시 LLM이 이미지를 추가 참고자료로 활용합니다.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -72,11 +74,11 @@ public interface RepairEstimateApiSpecification {
                                             }
                                             """)))
             })
-    ResponseEntity<RepairEstimateResponse> createEstimate(
+    ResponseEntity<RepairEstimateCreateResponse> createEstimate(
             @RequestPart("request") RepairEstimateRequest request,
-            @RequestPart(value = "image", required = false)
-            @Parameter(description = "차량 손상 이미지 (선택, jpg/png)", schema = @Schema(type = "string", format = "binary"))
-            MultipartFile image,
+            @RequestPart(value = "images", required = false)
+            @Parameter(description = "차량 손상 이미지 (선택, 최대 5장, jpg/png)", schema = @Schema(type = "array"))
+            List<MultipartFile> images,
             @AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(

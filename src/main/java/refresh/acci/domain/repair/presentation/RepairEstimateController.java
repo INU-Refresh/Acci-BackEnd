@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import refresh.acci.domain.repair.application.facade.RepairEstimateFacade;
+import refresh.acci.domain.repair.presentation.dto.RepairEstimateCreateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse;
@@ -25,12 +26,12 @@ public class RepairEstimateController implements RepairEstimateApiSpecification{
     private final RepairEstimateFacade repairEstimateFacade;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<RepairEstimateResponse> createEstimate(
+    public ResponseEntity<RepairEstimateCreateResponse> createEstimate(
             @RequestPart("request") RepairEstimateRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        RepairEstimateResponse response = repairEstimateFacade.createEstimate(request, images, userDetails.getId());
+        RepairEstimateCreateResponse response = repairEstimateFacade.createEstimate(request, images, userDetails.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

@@ -25,11 +25,11 @@ public class RepairEstimateResponse {
     private final LocalDateTime createdAt;
 
 
-    public static RepairEstimateResponse of(RepairEstimate estimate, List<DamageDetail> damageDetails, List<RepairItem> repairItems) {
+    public static RepairEstimateResponse of(RepairEstimate estimate, List<DamageDetail> damageDetails, List<RepairItem> repairItems, List<String> imageUrls) {
         return RepairEstimateResponse.builder()
                 .estimateId(estimate.getId())
                 .vehicleInfo(VehicleInfoDto.from(estimate.getVehicleInfo()))
-                .images()
+                .images(imageUrls)
                 .damageDetails(damageDetails.stream()
                         .map(DamageDetailDto::from)
                         .toList())

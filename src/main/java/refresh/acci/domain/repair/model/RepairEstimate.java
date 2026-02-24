@@ -29,9 +29,6 @@ public class RepairEstimate extends BaseTime {
     @Embedded
     private VehicleInfo vehicleInfo;
 
-    @Column(name = "user_description", length = 1000)
-    private String userDescription;
-
     @Column(name = "image_s3_key")
     private String imageS3Key;
 
@@ -43,18 +40,16 @@ public class RepairEstimate extends BaseTime {
     private Long totalEstimatedCost;
 
     @Builder
-    public RepairEstimate(Long userId, VehicleInfo vehicleInfo, String userDescription) {
+    public RepairEstimate(Long userId, VehicleInfo vehicleInfo) {
         this.userId = userId;
         this.vehicleInfo = vehicleInfo;
-        this.userDescription = userDescription;
         this.estimateStatus = EstimateStatus.PENDING;
     }
 
-    public static RepairEstimate of(Long userId, VehicleInfo vehicleInfo, String userDescription) {
+    public static RepairEstimate of(Long userId, VehicleInfo vehicleInfo) {
         return RepairEstimate.builder()
                 .userId(userId)
                 .vehicleInfo(vehicleInfo)
-                .userDescription(userDescription)
                 .build();
     }
 

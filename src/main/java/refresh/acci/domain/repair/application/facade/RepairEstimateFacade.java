@@ -58,7 +58,7 @@ public class RepairEstimateFacade {
         VehicleInfo vehicleInfo = buildVehicleInfo(request);
 
         //RepairEstimate Entity 정보 생성 및 저장
-        RepairEstimate estimate = RepairEstimate.of(userId, vehicleInfo, request.getUserDescription());
+        RepairEstimate estimate = RepairEstimate.of(userId, vehicleInfo);
         estimate = commandService.createEstimate(estimate);
 
         //이미지 S3 업로드

@@ -64,6 +64,10 @@ dependencies {
 	// Properties
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+	// Monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
   	// Testing
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

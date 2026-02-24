@@ -35,20 +35,25 @@ public class DamageDetail {
     @Column(name = "damage_severity", nullable = false)
     private DamageSeverity damageSeverity;
 
+    @Column(name = "user_description", length = 300)
+    private String userDescription;
+
     @Builder
-    public DamageDetail(UUID repairEstimateId, String partNameKr, String partNameEn, DamageSeverity damageSeverity) {
+    public DamageDetail(UUID repairEstimateId, String partNameKr, String partNameEn, DamageSeverity damageSeverity, String userDescription) {
         this.repairEstimateId = repairEstimateId;
         this.partNameKr = partNameKr;
         this.partNameEn = partNameEn;
         this.damageSeverity = damageSeverity;
+        this.userDescription = userDescription;
     }
 
-    public static DamageDetail of(UUID repairEstimateId, String partNameKr, String partNameEn, DamageSeverity damageSeverity) {
+    public static DamageDetail of(UUID repairEstimateId, String partNameKr, String partNameEn, DamageSeverity damageSeverity, String userDescription) {
         return DamageDetail.builder()
                 .repairEstimateId(repairEstimateId)
                 .partNameKr(partNameKr)
                 .partNameEn(partNameEn)
                 .damageSeverity(damageSeverity)
+                .userDescription(userDescription)
                 .build();
     }
 }

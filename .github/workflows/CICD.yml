@@ -29,7 +29,7 @@ jobs:
         run: ./gradlew clean build -x test -i --no-daemon -Dspring.profiles.active=prod
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -46,11 +46,21 @@ jobs:
     needs: ci
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose and monitoring config to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.AWS_EC2_IP }}
+          username: ${{ secrets.AWS_EC2_USERNAME }}
+          key: ${{ secrets.AWS_EC2_KEY }}
+          port: ${{ secrets.AWS_EC2_PORT }}
+          source: "docker-compose.yml,monitoring/"
+          target: "/home/ubuntu"
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AWS_EC2_IP }}
           username: ${{ secrets.AWS_EC2_USERNAME }}
@@ -59,39 +69,35 @@ jobs:
           script: |
             cd /home/ubuntu
 
-            APP_NAME=${{ secrets.DOCKER_REPO }}
-            IMAGE=${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+            cat > .env << EOF
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            DOCKER_REPO=${{ secrets.DOCKER_REPO }}
+            MYSQL_URL=${{ secrets.MYSQL_URL }}
+            MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}
+            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+            NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
+            NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
+            BACKEND_URL=${{ secrets.BACKEND_URL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            AI_SERVER_URL=${{ secrets.AI_SERVER_URL }}
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+            AI_MAX_ATTEMPTS=${{ secrets.AI_MAX_ATTEMPTS }}
+            AI_INTERVAL_MS=${{ secrets.AI_INTERVAL_MS }}
+            GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
+            GRAFANA_ADMIN_PASSWORD=${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+            EOF
+            chmod 600 .env
 
-            docker pull "$IMAGE"
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
 
-            if [ "$(docker ps -aq -f name=$APP_NAME)" ]; then
-              echo "Stopping existing container: $APP_NAME"
-              docker stop "$APP_NAME" || true
-              docker rm "$APP_NAME" || true
-            fi
-            
-            docker run -d \
-              --name "$APP_NAME" \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e "JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Seoul -Xms256m -Xmx512m" \
-              -e "MYSQL_URL=${{ secrets.MYSQL_URL }}" \
-              -e "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" \
-              -e "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" \
-              -e "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" \
-              -e "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
-              -e "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
-              -e "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" \
-              -e "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" \
-              -e "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" \
-              -e "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" \
-              -e "BACKEND_URL=${{ secrets.BACKEND_URL }}" \
-              -e "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" \
-              -e "AI_SERVER_URL=${{ secrets.AI_SERVER_URL }}" \
-              -e "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
-              -e "AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" \
-              -e "AI_MAX_ATTEMPTS=${{ secrets.AI_MAX_ATTEMPTS }}" \
-              -e "AI_INTERVAL_MS=${{ secrets.AI_INTERVAL_MS }}" \
-              -p "8080:8080" \
-              "$IMAGE"
+            docker compose up -d
+
+            docker compose up -d --force-recreate app
 
             docker image prune -f

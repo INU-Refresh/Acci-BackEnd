@@ -18,20 +18,24 @@ public class PdfIndexingService {
     private final PgVectorChunkRepository pgVectorChunkRepository;
     private final GeminiEmbeddingService geminiEmbeddingService;
 
-    public void indexPdf(Path pdfPath, String docName, Integer accidentType) throws IOException {
-        pgVectorChunkRepository.deleteByDocName(docName);
+    public void indexPdf(Path pdfPath, String docName, Integer accidentType, int startPage, int endPage) throws IOException {
+        if (startPage == 1) {
+            pgVectorChunkRepository.deleteByDocName(docName);
+        }
 
         try (PDDocument doc = PDDocument.load(pdfPath.toFile())) {
             PDFTextStripper stripper = new PDFTextStripper();
             int pages = doc.getNumberOfPages();
+            int from = Math.max(1, startPage);
+            int to = Math.min(pages, endPage);
 
-            for (int page = 1; page <= pages; page++) {
+            for (int page = from; page <= to; page++) {
                 stripper.setStartPage(page);
                 stripper.setEndPage(page);
                 String text = stripper.getText(doc).trim();
                 if (text.isBlank()) continue;
 
-                for (String chunk : chunk(text, 900, 150)) {
+                for (String chunk : chunk(text, 2000, 250)) {
                     float[] emb = geminiEmbeddingService.embed(chunk);
 
                     pgVectorChunkRepository.insertChunk(
@@ -44,7 +48,7 @@ public class PdfIndexingService {
                             emb
                     );
 
-                    Thread.sleep(200);
+                    Thread.sleep(50);
                 }
             }
         } catch (InterruptedException e) {

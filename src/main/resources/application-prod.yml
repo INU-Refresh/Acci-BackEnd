@@ -94,6 +94,10 @@ openai:
   max-tokens: 10000
   temperature: 0.3
 
+# RAG 용 Gemini 설정
+gemini:
+  api-key: ${GEMINI_API_KEY}
+
 # 애플리케이션 설정
 app:
   oauth2:

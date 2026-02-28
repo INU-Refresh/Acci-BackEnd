@@ -1,7 +1,7 @@
 package refresh.acci.domain.analysis.adapter.out.ai;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -21,10 +21,13 @@ import java.time.Duration;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class WebClientAiClientAdapter implements AiClientPort {
 
     private final WebClient aiWebClient;
+
+    public WebClientAiClientAdapter(@Qualifier("aiWebClient") WebClient aiWebClient) {
+        this.aiWebClient = aiWebClient;
+    }
 
     // AI 서버와 통신하여 분석 요청 및 결과 수신
     @Override

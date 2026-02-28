@@ -94,6 +94,7 @@ jobs:
             VECTOR_DB_URL=${{ secrets.VECTOR_DB_URL }}
             VECTOR_DB_USERNAME=${{ secrets.VECTOR_DB_USERNAME }}
             VECTOR_DB_PASSWORD=${{ secrets.VECTOR_DB_PASSWORD }}
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
             EOF
             chmod 600 .env
 

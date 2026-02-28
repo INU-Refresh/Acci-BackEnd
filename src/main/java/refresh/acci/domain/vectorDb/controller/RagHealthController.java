@@ -3,11 +3,11 @@ package refresh.acci.domain.vectorDb.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import refresh.acci.domain.vectorDb.domain.repository.PgVectorChunkRepository;
+import refresh.acci.domain.vectorDb.port.out.EmbeddingPort;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,6 +17,7 @@ public class RagHealthController {
     @Qualifier("vectorDbJdbcTemplate")
     private final JdbcTemplate vectorJdbcTemplate;
     private final PgVectorChunkRepository repo;
+    private final EmbeddingPort embeddingPort;
 
     @GetMapping("/health")
     public String health() {
@@ -28,5 +29,14 @@ public class RagHealthController {
     public String insert() {
         repo.insertChunkWithoutEmbedding(11, "sample.pdf", 1, "테스트 청크입니다.");
         return "count=" + repo.countChunks();
+    }
+
+    @GetMapping("/embed")
+    public Map<String, Object> embed(@RequestParam String q) {
+        float[] v = embeddingPort.embed(q);
+        return Map.of(
+                "dim", v.length,
+                "sample", new float[]{ v[0], v[1], v[2] }
+        );
     }
 }

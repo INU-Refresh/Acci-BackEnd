@@ -1,4 +1,4 @@
-package refresh.acci.domain.vectorDb.adpater.out;
+package refresh.acci.domain.vectorDb.application;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -8,31 +8,28 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import refresh.acci.domain.vectorDb.adpater.out.dto.req.GeminiEmbedRequest;
-import refresh.acci.domain.vectorDb.adpater.out.dto.res.GeminiEmbedResponse;
-import refresh.acci.domain.vectorDb.port.out.EmbeddingPort;
+import refresh.acci.domain.vectorDb.presentation.dto.req.GeminiEmbedRequest;
+import refresh.acci.domain.vectorDb.presentation.dto.res.GeminiEmbedResponse;
 import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 
 @Slf4j
 @Component
-public class GeminiEmbeddingAdapter implements EmbeddingPort {
+public class GeminiEmbeddingService {
 
     private final WebClient geminiWebClient;
 
-    public GeminiEmbeddingAdapter(@Qualifier("geminiWebClient") WebClient geminiWebClient) {
+    public GeminiEmbeddingService(@Qualifier("geminiWebClient") WebClient geminiWebClient) {
         this.geminiWebClient = geminiWebClient;
     }
 
     @Value("${gemini.api-key}")
     private String apiKey;
 
-    @Override
     public int dimensions() {
         return 3072;
     }
 
-    @Override
     public float[] embed(String text) {
         GeminiEmbedResponse res = geminiWebClient.post()
                 .uri(uriBuilder -> uriBuilder

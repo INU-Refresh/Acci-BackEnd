@@ -1,4 +1,4 @@
-package refresh.acci.domain.vectorDb.adpater.out.dto.req;
+package refresh.acci.domain.vectorDb.presentation.dto.req;
 
 public record GeminiEmbedRequest(Content content) {
     public record Content(Part[] parts) {}

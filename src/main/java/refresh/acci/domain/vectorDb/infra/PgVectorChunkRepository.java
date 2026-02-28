@@ -1,4 +1,4 @@
-package refresh.acci.domain.vectorDb.domain.repository;
+package refresh.acci.domain.vectorDb.infra;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,7 +40,8 @@ public class PgVectorChunkRepository {
                 SELECT id, accident_type, doc_name, page, section, case_id, chunk_text,
                        (embedding <=> ?::vector) AS distance
                 FROM legal_chunks
-                WHERE (? IS NULL OR accident_type = ?)
+                WHERE embedding IS NOT NULL
+                AND (? IS NULL OR accident_type = ?)
                 ORDER BY embedding <=> ?::vector
                 LIMIT ?
                 """;
@@ -73,6 +74,10 @@ public class PgVectorChunkRepository {
 
     public Integer countChunks() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM legal_chunks", Integer.class);
+    }
+
+    public void deleteByDocName(String docName) {
+        jdbcTemplate.update("DELETE FROM legal_chunks WHERE doc_name = ?", docName);
     }
 
     // float[]를 PostgreSQL의 vector 리터럴 형식으로 변환하는 헬퍼 메서드

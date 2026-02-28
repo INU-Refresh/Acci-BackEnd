@@ -1,11 +1,11 @@
-package refresh.acci.domain.vectorDb.controller;
+package refresh.acci.domain.vectorDb.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
-import refresh.acci.domain.vectorDb.domain.repository.PgVectorChunkRepository;
-import refresh.acci.domain.vectorDb.port.out.EmbeddingPort;
+import refresh.acci.domain.vectorDb.application.GeminiEmbeddingService;
+import refresh.acci.domain.vectorDb.infra.PgVectorChunkRepository;
 import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkRow;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class RagHealthController {
     @Qualifier("vectorDbJdbcTemplate")
     private final JdbcTemplate vectorJdbcTemplate;
     private final PgVectorChunkRepository repo;
-    private final EmbeddingPort embeddingPort;
+    private final GeminiEmbeddingService geminiEmbeddingService;
 
     @GetMapping("/health")
     public String health() {
@@ -35,7 +35,7 @@ public class RagHealthController {
 
     @GetMapping("/embed")
     public Map<String, Object> embed(@RequestParam String q) {
-        float[] v = embeddingPort.embed(q);
+        float[] v = geminiEmbeddingService.embed(q);
         return Map.of(
                 "dim", v.length,
                 "sample", new float[]{ v[0], v[1], v[2] }
@@ -45,12 +45,12 @@ public class RagHealthController {
     @PostMapping("/e2e")
     public List<LegalChunkRow> e2e() {
         String chunk = "직선 도로에서 선행 차량이 차로변경 중 후행 차량과 충돌";
-        float[] emb = embeddingPort.embed(chunk);
+        float[] emb = geminiEmbeddingService.embed(chunk);
 
         repo.insertChunk(11, "test", 1, "test", "test", chunk, emb);
 
         String query = "차로변경하다가 뒤차와 부딪힘";
-        float[] qEmb = embeddingPort.embed(query);
+        float[] qEmb = geminiEmbeddingService.embed(query);
 
         return repo.searchTopK(11, qEmb, 5);
     }

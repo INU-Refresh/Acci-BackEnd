@@ -40,7 +40,8 @@ public class PgVectorChunkRepository {
                 SELECT id, accident_type, doc_name, page, section, case_id, chunk_text,
                        (embedding <=> ?::vector) AS distance
                 FROM legal_chunks
-                WHERE (? IS NULL OR accident_type = ?)
+                WHERE embedding IS NOT NULL
+                AND (? IS NULL OR accident_type = ?)
                 ORDER BY embedding <=> ?::vector
                 LIMIT ?
                 """;

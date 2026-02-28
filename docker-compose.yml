@@ -78,6 +78,21 @@ services:
     networks:
       - monitoring
 
+  pgvector:
+    image: pgvector/pgvector:pg16
+    container_name: acci-pgvector
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=acci_vector
+      - POSTGRES_USER=${VECTOR_DB_USERNAME}
+      - POSTGRES_PASSWORD=${VECTOR_DB_PASSWORD}
+    volumes:
+      - pgvector-data:/var/lib/postgresql/data
+    networks:
+      - monitoring
+
 networks:
   monitoring:
     driver: bridge
@@ -85,3 +100,4 @@ networks:
 volumes:
   prometheus-data:
   grafana-data:
+  pgvector-data:

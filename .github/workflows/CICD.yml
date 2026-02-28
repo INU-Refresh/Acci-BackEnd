@@ -91,6 +91,9 @@ jobs:
             AI_INTERVAL_MS=${{ secrets.AI_INTERVAL_MS }}
             GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
             GRAFANA_ADMIN_PASSWORD=${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+            VECTOR_DB_URL=${{ secrets.VECTOR_DB_URL }}
+            VECTOR_DB_USERNAME=${{ secrets.VECTOR_DB_USERNAME }}
+            VECTOR_DB_PASSWORD=${{ secrets.VECTOR_DB_PASSWORD }}
             EOF
             chmod 600 .env
 

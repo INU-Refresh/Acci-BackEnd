@@ -116,6 +116,11 @@ cloud:
     s3:
       bucket: ${AWS_S3_BUCKET}
 
+vector-db:
+  url: ${VECTOR_DB_URL}
+  username: ${VECTOR_DB_USERNAME}
+  password: ${VECTOR_DB_PASSWORD}
+
 logging:
   file:
     path: /acci/logs

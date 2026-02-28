@@ -126,6 +126,7 @@ vector-db:
   url: ${VECTOR_DB_URL}
   username: ${VECTOR_DB_USERNAME}
   password: ${VECTOR_DB_PASSWORD}
+  driver-class-name: org.postgresql.Driver
 
 logging:
   file:

@@ -1,6 +1,7 @@
 package refresh.acci.global.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +15,18 @@ public class VectorDbConfig {
 
     @Bean(name = "vectorDataSource")
     @ConfigurationProperties(prefix = "vector-db")
-    public DataSource dataSource() {
-        return DataSourceBuilder.create().build();
+    public DataSource dataSource(
+            @Value("${vector-db.url}") String url,
+            @Value("${vector-db.username}") String username,
+            @Value("${vector-db.password}") String password,
+            @Value("${vector-db.driver-class-name:org.postgresql.Driver}") String driver
+    ) {
+        return DataSourceBuilder.create()
+                .url(url)
+                .username(username)
+                .password(password)
+                .driverClassName(driver)
+                .build();
     }
 
     @Bean(name = "vectorDbJdbcTemplate")

@@ -64,6 +64,17 @@ public class PgVectorChunkRepository {
                 topK);
     }
 
+    public void insertChunkWithoutEmbedding(Integer accidentType, String docName, Integer page, String chunkText) {
+        jdbcTemplate.update("""
+        INSERT INTO legal_chunks(accident_type, doc_name, page, chunk_text)
+        VALUES (?, ?, ?, ?)
+    """, accidentType, docName, page, chunkText);
+    }
+
+    public Integer countChunks() {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM legal_chunks", Integer.class);
+    }
+
     // float[]를 PostgreSQL의 vector 리터럴 형식으로 변환하는 헬퍼 메서드
     // pgvector 입력 리터럴: '[0.1,0.2,...]'
     private String vectorLiteral(float[] vector) {

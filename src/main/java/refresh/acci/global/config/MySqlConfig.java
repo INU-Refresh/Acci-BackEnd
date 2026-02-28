@@ -2,7 +2,7 @@ package refresh.acci.global.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +25,18 @@ public class MySqlConfig {
 
     @Primary
     @Bean(name = "mysqlDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSource mysqlDataSource() {
-        return DataSourceBuilder.create().build();
+    public DataSource mysqlDataSource(
+            @Value("${spring.datasource.url}") String url,
+            @Value("${spring.datasource.username}") String username,
+            @Value("${spring.datasource.password}") String password,
+            @Value("${spring.datasource.driver-class-name:com.mysql.cj.jdbc.Driver}") String driver
+    ) {
+        return DataSourceBuilder.create()
+                .driverClassName(driver)
+                .url(url)
+                .username(username)
+                .password(password)
+                .build();
     }
 
     @Primary

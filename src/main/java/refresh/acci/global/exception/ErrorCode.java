@@ -60,6 +60,8 @@ public enum ErrorCode {
     TOO_MANY_DAMAGE_DETAILS(HttpStatus.BAD_REQUEST, 400, "파손 부위는 최대 20개까지 입력 가능합니다."),
     REPAIR_ESTIMATE_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST,400, "이미지는 최대 5장까지 업로드 가능합니다."),
 
+    // Vector DB
+    GEMINI_EMBED_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Gemini 임베딩 생성에 실패했습니다."),
     ;
 
     private final HttpStatus httpStatus;

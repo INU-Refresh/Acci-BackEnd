@@ -28,6 +28,7 @@ services:
       - VECTOR_DB_URL=${VECTOR_DB_URL}
       - VECTOR_DB_USERNAME=${VECTOR_DB_USERNAME}
       - VECTOR_DB_PASSWORD=${VECTOR_DB_PASSWORD}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     networks:
       - monitoring
 

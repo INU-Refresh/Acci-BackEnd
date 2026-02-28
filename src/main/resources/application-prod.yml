@@ -17,6 +17,12 @@ spring:
         type: false
         jdbc:
           time_zone: Asia/Seoul
+          lob:
+            non_contextual_creation: true
+
+  sql:
+    init:
+      mode: never
 
   servlet:
     multipart:

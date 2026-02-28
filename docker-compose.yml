@@ -25,6 +25,9 @@ services:
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}
       - AI_MAX_ATTEMPTS=${AI_MAX_ATTEMPTS}
       - AI_INTERVAL_MS=${AI_INTERVAL_MS}
+      - VECTOR_DB_URL=${VECTOR_DB_URL}
+      - VECTOR_DB_USERNAME=${VECTOR_DB_USERNAME}
+      - VECTOR_DB_PASSWORD=${VECTOR_DB_PASSWORD}
     networks:
       - monitoring
 

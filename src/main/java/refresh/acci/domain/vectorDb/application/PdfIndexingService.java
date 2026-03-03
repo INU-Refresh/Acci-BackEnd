@@ -17,8 +17,9 @@ public class PdfIndexingService {
 
     private final PgVectorChunkRepository pgVectorChunkRepository;
     private final GeminiEmbeddingService geminiEmbeddingService;
+    private final PageToAccidentTypeMapper pageToAccidentTypeMapper;
 
-    public void indexPdf(Path pdfPath, String docName, Integer accidentType, int startPage, int endPage) throws IOException {
+    public void indexPdf(Path pdfPath, String docName, int startPage, int endPage) throws IOException {
         if (startPage == 1) {
             pgVectorChunkRepository.deleteByDocName(docName);
         }
@@ -35,11 +36,14 @@ public class PdfIndexingService {
                 String text = stripper.getText(doc).trim();
                 if (text.isBlank()) continue;
 
+                Integer mappedType = pageToAccidentTypeMapper.findTypeByPage(page);
+                if (mappedType == null) continue;
+
                 for (String chunk : chunk(text, 2000, 250)) {
                     float[] emb = geminiEmbeddingService.embed(chunk);
 
                     pgVectorChunkRepository.insertChunk(
-                            accidentType,
+                            mappedType,
                             docName,
                             page,
                             null,

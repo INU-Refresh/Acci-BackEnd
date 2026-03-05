@@ -42,23 +42,23 @@ public class RagSummaryService {
                 아래 '근거 텍스트'에서만 정보를 사용해라. 추측하거나 새 사실을 만들지 마라.
                 근거에 없는 내용은 "근거 없음"이라고 적어라.
                 가능한 경우 각 항목 끝에 [문서명 p.X] 형태로 출처를 붙여라.
-                반드시 JSON만 출력해라. (코드블록 금지, 설명 금지)
+                반드시 JSON만 출력해라. (코드블록 금지, 설명 금지, 앞뒤 텍스트 금지)
 
-                출력 JSON 형식:
+                출력 JSON 형식 (키 이름 변경 금지):
                 {
-                  "accidentSituation": "...",
-                  "baseFaultExplanation": "...",
-                  "adjustmentExplanation": "...",
-                  "usageNotes": "...",
+                  "accidentSituation": "사고 상황 요약 (1~3문장)",
+                  "accidentExplain": "과실비율/판단 근거 요약 (핵심만 3~6문장)",
                   "relatedLaws": [
-                    {"lawName":"...","lawContent":"...","source":"..."}
+                    {"lawName":"법 이름/조문", "lawContent":"관련 내용 요약"}
                   ],
                   "precedentCases": [
-                    {"caseName":"...","summary":"...","dateOfJudgment":"...","faultRatio":"...","source":"..."}
+                    {"caseName":"판례명", "summary":"핵심 요지 요약", "dateOfJudgment":"YYYY-MM-DD 또는 null"}
                   ]
                 }
                 
-                JSON 키 이름은 반드시 위 형식과 동일해야 한다. (변경 금지)
+                dateOfJudgment 규칙:
+                 - 날짜가 근거 텍스트에 명확히 있으면 "YYYY-MM-DD"
+                 - 없으면 null
 
                 근거 텍스트:
                 <<<%s>>>

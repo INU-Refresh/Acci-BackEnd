@@ -2,6 +2,7 @@ package refresh.acci.domain.vectorDb.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkRow;
 import refresh.acci.domain.vectorDb.presentation.dto.res.RagInfoResponse;
 import refresh.acci.domain.analysis.model.Analysis;
 import refresh.acci.domain.analysis.model.enums.AccidentType;
@@ -9,7 +10,9 @@ import refresh.acci.domain.vectorDb.infra.PgVectorChunkRepository;
 import refresh.acci.global.exception.CustomException;
 import refresh.acci.global.exception.ErrorCode;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,14 +23,20 @@ public class RagSearchService {
 
     public RagInfoResponse search(Analysis analysis) {
         int type = normalizeForSearch(analysis.getAccidentType());
-
         String query = buildQueryText(analysis);
-
         float[] qEmb = embeddingService.embed(query);
 
-        var rows = pgVectorChunkRepository.searchTopK(type, qEmb, 5);
+        var topK = pgVectorChunkRepository.searchTopK(type, qEmb, 5);
+        var laws = pgVectorChunkRepository.pickLawChunks(type, 3);
+        var precedents = pgVectorChunkRepository.pickPrecedentChunks(type, 3);
 
-        List<RagInfoResponse.LegalChunkHit> hits = rows.stream()
+        // id 기준 중복 제거 + 합치기
+        Map<Long, LegalChunkRow> merged = new LinkedHashMap<>();
+        topK.forEach(r -> merged.put(r.id(), r));
+        laws.forEach(r -> merged.putIfAbsent(r.id(), r));
+        precedents.forEach(r -> merged.putIfAbsent(r.id(), r));
+
+        List<RagInfoResponse.LegalChunkHit> hits = merged.values().stream()
                 .map(r -> new RagInfoResponse.LegalChunkHit(
                         r.id(),
                         r.accidentType(),

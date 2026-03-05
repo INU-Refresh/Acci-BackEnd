@@ -3,6 +3,7 @@ package refresh.acci.domain.vectorDb.infra;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkRow;
 
@@ -48,36 +49,17 @@ public class PgVectorChunkRepository {
 
         String qVec = vectorLiteral(queryEmbedding);
 
-        return jdbcTemplate.query(sql,
-                (rs, rowNum) -> new LegalChunkRow(
-                        rs.getLong("id"),
-                        (Integer) rs.getObject("accident_type"),
-                        rs.getString("doc_name"),
-                        (Integer) rs.getObject("page"),
-                        rs.getString("section"),
-                        rs.getString("case_id"),
-                        rs.getString("chunk_text"),
-                        rs.getDouble("distance")
-                ),
+        return jdbcTemplate.query(
+                sql,
+                rowMapper,
                 qVec,
                 accidentTypeFilter, accidentTypeFilter,
                 qVec,
                 topK);
     }
 
-    public void insertChunkWithoutEmbedding(Integer accidentType, String docName, Integer page, String chunkText) {
-        jdbcTemplate.update("""
-        INSERT INTO legal_chunks(accident_type, doc_name, page, chunk_text)
-        VALUES (?, ?, ?, ?)
-    """, accidentType, docName, page, chunkText);
-    }
-
     public Integer countChunks() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM legal_chunks", Integer.class);
-    }
-
-    public void deleteByDocName(String docName) {
-        jdbcTemplate.update("DELETE FROM legal_chunks WHERE doc_name = ?", docName);
     }
 
     // float[]를 PostgreSQL의 vector 리터럴 형식으로 변환하는 헬퍼 메서드
@@ -92,4 +74,51 @@ public class PgVectorChunkRepository {
         sb.append(']');
         return sb.toString();
     }
+
+    // 법규 및 판례 관련 청크를 사고유형별로 선별하여 반환하는 메서드들
+    public List<LegalChunkRow> pickLawChunks(Integer accidentType, int limit) {
+        String sql = """
+        SELECT id, accident_type, doc_name, page, section, case_id, chunk_text,
+               0.0 AS distance
+        FROM legal_chunks
+        WHERE (? IS NULL OR accident_type = ?)
+          AND (
+            chunk_text ILIKE '%관련 법규%'
+            OR chunk_text ILIKE '%도로교통법%'
+            OR chunk_text ILIKE '%법규%'
+          )
+        ORDER BY page ASC, id ASC
+        LIMIT ?
+        """;
+        return jdbcTemplate.query(sql, rowMapper, accidentType, accidentType, limit);
+    }
+
+    public List<LegalChunkRow> pickPrecedentChunks(Integer accidentType, int limit) {
+        String sql = """
+        SELECT id, accident_type, doc_name, page, section, case_id, chunk_text,
+               0.0 AS distance
+        FROM legal_chunks
+        WHERE (? IS NULL OR accident_type = ?)
+          AND (
+            chunk_text ILIKE '%참고 판례%'
+            OR chunk_text ILIKE '%판결%'
+            OR chunk_text ILIKE '%선고%'
+            OR chunk_text ILIKE '%지방법원%'
+          )
+        ORDER BY page ASC, id ASC
+        LIMIT ?
+        """;
+        return jdbcTemplate.query(sql, rowMapper, accidentType, accidentType, limit);
+    }
+
+    private final RowMapper<LegalChunkRow> rowMapper = (rs, rowNum) -> new LegalChunkRow(
+            rs.getLong("id"),
+            (Integer) rs.getObject("accident_type"),
+            rs.getString("doc_name"),
+            (Integer) rs.getObject("page"),
+            rs.getString("section"),
+            rs.getString("case_id"),
+            rs.getString("chunk_text"),
+            rs.getDouble("distance")
+    );
 }

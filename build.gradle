@@ -74,6 +74,9 @@ dependencies {
 	// pdf
 	implementation 'org.apache.pdfbox:pdfbox:2.0.30'
 
+	// Jackson
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
   	// Testing
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

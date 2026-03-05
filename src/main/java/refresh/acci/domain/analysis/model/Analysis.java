@@ -8,6 +8,7 @@ import org.hibernate.annotations.UuidGenerator;
 import refresh.acci.domain.analysis.model.enums.AccidentType;
 import refresh.acci.domain.analysis.model.enums.AnalysisStatus;
 import refresh.acci.domain.analysis.adapter.out.ai.dto.res.AiResultResponse;
+import refresh.acci.domain.analysis.model.enums.RagStatus;
 import refresh.acci.global.common.BaseTime;
 
 import java.util.UUID;
@@ -59,16 +60,27 @@ public class Analysis extends BaseTime {
     @Column(name = "accident_status")
     private AnalysisStatus analysisStatus;
 
+    @Column(name = "accident_situation")
+    private String accidentSituation;
+
+    @Column(name = "accident_explain")
+    private String accidentExplain;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rag_status")
+    private RagStatus ragStatus;
+
     @Column(name = "is_completed", nullable = false)
     private boolean isCompleted = false;
 
-    private Analysis(Long userId, AnalysisStatus analysisStatus) {
+    private Analysis(Long userId, AnalysisStatus analysisStatus, RagStatus ragStatus) {
         this.userId = userId;
         this.analysisStatus = analysisStatus;
+        this.ragStatus = ragStatus;
     }
 
     public static Analysis of(Long userId) {
-        return new Analysis(userId, AnalysisStatus.PROCESSING);
+        return new Analysis(userId, AnalysisStatus.PROCESSING, RagStatus.NONE);
     }
 
     public void attachVideoS3Key(String videoS3Key) {

@@ -10,4 +10,7 @@ public interface AnalysisRepositoryPort {
     Analysis saveAndFlush(Analysis analysis);
     Analysis getById(UUID id);
     PageResponse<AnalysisSummaryResponse> getUserAnalyses(Long userId, int page, int size);
+    boolean tryMarkRagInProgress(UUID analysisId);
+    void markRagDone(UUID analysisId);
+    void markRagFailed(UUID analysisId);
 }

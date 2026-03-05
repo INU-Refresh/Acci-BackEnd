@@ -45,6 +45,9 @@ public enum ErrorCode {
     ACCESS_DENIED_TO_ANALYSIS(HttpStatus.FORBIDDEN, 403, "해당 분석에 접근할 권한이 없습니다."),
     S3_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "S3 업로드에 실패했습니다."),
     VIDEO_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "분석 영상이 존재하지 않습니다."),
+    ANALYSIS_NOT_COMPLETED(HttpStatus.BAD_REQUEST, 400, "분석이 아직 완료되지 않았습니다."),
+    RAG_STATUS_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, 500, "RAG 상태가 유효하지 않습니다."),
+    RAG_ALREADY_PROGRESS(HttpStatus.BAD_REQUEST, 400, "RAG 검색이 이미 진행 중입니다. 잠시 후 다시 시도해주세요."),
 
     // Repair Estimate
     INVALID_VEHICLE_BRAND(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 차량 브랜드입니다."),
@@ -62,6 +65,9 @@ public enum ErrorCode {
 
     // Vector DB
     GEMINI_EMBED_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Gemini 임베딩 생성에 실패했습니다."),
+    GEMINI_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, 429, "Gemini API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요."),
+    GEMINI_RESPONSE_EMPTY(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Gemini API 응답이 비어있습니다."),
+    GEMINI_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Gemini API 요청 중 오류가 발생했습니다.")
     ;
 
     private final HttpStatus httpStatus;

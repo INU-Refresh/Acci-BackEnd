@@ -27,6 +27,7 @@ public class AnalysisController implements AnalysisApiSpecification {
     private final GetLoadingTipUseCase getLoadingTipUseCase;
     private final QueryAnalysisUseCase queryAnalysisUseCase;
     private final GetVideoUrlUseCase getVideoUrlUseCase;
+    private final AnalysisResultUseCase analysisResultUseCase;
 
     // 영상 분석 업로드
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -57,7 +58,7 @@ public class AnalysisController implements AnalysisApiSpecification {
             @PathVariable UUID analysisId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(queryAnalysisUseCase.getAnalysisResult(analysisId, userDetails));
+        return ResponseEntity.status(HttpStatus.OK).body(analysisResultUseCase.getAnalysisResult(analysisId, userDetails));
     }
 
     // 영상 분석 결과 페이징 조회
@@ -71,7 +72,6 @@ public class AnalysisController implements AnalysisApiSpecification {
                 userDetails.getId(), page, size);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
 
     // 분석 영상 URL 조회
     @GetMapping("/{analysisId}/video")

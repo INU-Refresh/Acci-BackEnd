@@ -1,0 +1,91 @@
+package refresh.acci.domain.vectorDb.application;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import refresh.acci.domain.vectorDb.presentation.dto.res.RagInfoResponse;
+import refresh.acci.domain.vectorDb.presentation.dto.res.RagSummaryResponse;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class RagSummaryService {
+
+    private final GeminiGenerateClient geminiGenerateClient;
+
+    // TODO 요약할 때 Law랑 Precedent 저장 로직 필요
+    public RagSummaryResponse summarize(RagInfoResponse ragInfoResponse, UUID analysisId) {
+        if (ragInfoResponse == null || ragInfoResponse.hits() == null || ragInfoResponse.hits().isEmpty()) {
+            return null;
+        }
+
+        String context = buildContext(ragInfoResponse);
+
+        String prompt = buildPrompt(context);
+
+        String modelText = geminiGenerateClient.generateText(prompt);
+        String json = geminiGenerateClient.extractJsonObject(modelText);
+
+        try {
+            return geminiGenerateClient.parseJson(json, RagSummaryResponse.class);
+        } catch (Exception e) {
+            log.warn("JSON 파싱 실패. 원본 모델 텍스트: {}", modelText, e);
+            throw e;
+        }
+    }
+
+    private String buildPrompt(String context) {
+        return """
+                너는 교통사고 과실 기준 문서를 근거로 요약하는 도우미다.
+                아래 '근거 텍스트'에서만 정보를 사용해라. 추측하거나 새 사실을 만들지 마라.
+                근거에 없는 내용은 "근거 없음"이라고 적어라.
+                가능한 경우 각 항목 끝에 [문서명 p.X] 형태로 출처를 붙여라.
+                반드시 JSON만 출력해라. (코드블록 금지, 설명 금지)
+
+                출력 JSON 형식:
+                {
+                  "accidentSituation": "...",
+                  "baseFaultExplanation": "...",
+                  "adjustmentExplanation": "...",
+                  "usageNotes": "...",
+                  "relatedLaws": [
+                    {"lawName":"...","lawContent":"...","source":"..."}
+                  ],
+                  "precedentCases": [
+                    {"caseName":"...","summary":"...","dateOfJudgment":"...","faultRatio":"...","source":"..."}
+                  ]
+                }
+                
+                JSON 키 이름은 반드시 위 형식과 동일해야 한다. (변경 금지)
+
+                근거 텍스트:
+                <<<%s>>>
+                """.formatted(context);
+    }
+
+    private String buildContext(RagInfoResponse ragInfoResponse) {
+        // distance 기준으로 상위 5개 hit만 사용
+        List<RagInfoResponse.LegalChunkHit> hits = ragInfoResponse.hits().stream()
+                .sorted(Comparator.comparingDouble(RagInfoResponse.LegalChunkHit::distance))
+                .limit(5)
+                .toList();
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < hits.size(); i++) {
+            var h = hits.get(i);
+            String text = h.chunkText();
+            if (text == null) text = "";
+            if (text.length() > 1800) text = text.substring(0, 1800);
+
+            sb.append("[").append(i + 1).append("] ")
+                    .append(h.docName()).append(" p.").append(h.page()).append("\n")
+                    .append(text)
+                    .append("\n\n");
+        }
+        return sb.toString();
+    }
+}

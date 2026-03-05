@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import refresh.acci.domain.precedent.model.enums.PrecedentType;
 import refresh.acci.global.common.BaseTime;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -18,31 +18,26 @@ public class Precedent extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String caseNumber;
+    @Column(name = "analysis_id", nullable = false)
+    private UUID analysisId;
 
-    @Column(nullable = false)
-    private String court;
+    @Column(name = "case_name")
+    private String caseName;
 
-    @Column(nullable = false)
+    @Column(name = "summary", columnDefinition = "TEXT")
+    private String summary;
+
+    @Column(name = "date_of_judgment")
     private LocalDate dateOfJudgment;
 
-    @Column(nullable = false)
-    private Long accidentRateA;
+    private Precedent(UUID analysisId, String caseName, String summary, LocalDate dateOfJudgment) {
+        this.analysisId = analysisId;
+        this.caseName = caseName;
+        this.summary = summary;
+        this.dateOfJudgment = dateOfJudgment;
+    }
 
-    @Column(nullable = false)
-    private Long accidentRateB;
-
-    @Column(name = "accident_title",nullable = false)
-    private String title;
-
-    @Column(name = "accident_overview", nullable = false)
-    private String overview;
-
-    @Column(name = "accident_description", nullable = false)
-    private String description;
-
-    @Column
-    @Enumerated(EnumType.STRING)
-    private PrecedentType precedentType;
+    public static Precedent of(UUID analysisId, String caseName, String summary, LocalDate dateOfJudgment) {
+        return new Precedent(analysisId, caseName, summary, dateOfJudgment);
+    }
 }

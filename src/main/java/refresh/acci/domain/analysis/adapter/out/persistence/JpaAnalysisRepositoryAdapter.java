@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.analysis.adapter.in.web.dto.res.AnalysisSummaryResponse;
 import refresh.acci.domain.analysis.application.port.out.AnalysisRepositoryPort;
 import refresh.acci.domain.analysis.model.Analysis;
@@ -23,11 +24,13 @@ public class JpaAnalysisRepositoryAdapter implements AnalysisRepositoryPort {
     private final AnalysisRepository analysisRepository;
 
     @Override
+    @Transactional
     public Analysis saveAndFlush(Analysis analysis) {
         return analysisRepository.saveAndFlush(analysis);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Analysis getById(UUID id) {
         return analysisRepository.findById(id)
                 .orElseThrow(() -> {
@@ -37,10 +40,32 @@ public class JpaAnalysisRepositoryAdapter implements AnalysisRepositoryPort {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse<AnalysisSummaryResponse> getUserAnalyses(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Analysis> analysisPage = analysisRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
         Page<AnalysisSummaryResponse> responsePage = analysisPage.map(AnalysisSummaryResponse::from);
         return PageResponse.of(responsePage);
+    }
+
+    @Override
+    public boolean tryMarkRagInProgress(UUID analysisId) {
+        return analysisRepository.tryMarkRagInProgress(analysisId) == 1;
+    }
+
+    @Override
+    public void markRagDone(UUID analysisId) {
+        int updated = analysisRepository.markRagDone(analysisId);
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.RAG_STATUS_INVALID);
+        }
+    }
+
+    @Override
+    public void markRagFailed(UUID analysisId) {
+        int updated = analysisRepository.markRagFail(analysisId);
+        if (updated == 0) {
+            log.warn("markRagFail skipped. id={}, status not IN_PROGRESS?", analysisId);
+        }
     }
 }

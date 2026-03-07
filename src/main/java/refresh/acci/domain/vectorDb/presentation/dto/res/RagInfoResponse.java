@@ -10,12 +10,4 @@ public record RagInfoResponse(
 
         List<LegalChunkHit> hits
 ) {
-    public record LegalChunkHit(
-            Long id,
-            int accidentType,
-            String docName,
-            int page,
-            String chunkText,
-            double distance
-    ) {}
 }

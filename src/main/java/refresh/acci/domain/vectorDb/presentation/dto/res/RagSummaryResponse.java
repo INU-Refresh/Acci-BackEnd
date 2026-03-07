@@ -2,7 +2,6 @@ package refresh.acci.domain.vectorDb.presentation.dto.res;
 
 import refresh.acci.domain.analysis.model.Analysis;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public record RagSummaryResponse(
@@ -16,16 +15,6 @@ public record RagSummaryResponse(
         List<PrecedentCasesResponse> precedentCases
 
 ) {
-    public record PrecedentCasesResponse(
-            String caseName,
-            String summary,
-            LocalDate dateOfJudgment
-    ) {}
-
-    public record RelatedLawsResponse(
-            String lawName,
-            String lawContent
-    ) {}
 
     public static RagSummaryResponse of(
             String accidentSituation,

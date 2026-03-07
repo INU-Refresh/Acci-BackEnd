@@ -5,6 +5,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 import refresh.acci.domain.vectorDb.infra.PgVectorChunkRepository;
+import refresh.acci.domain.vectorDb.presentation.dto.res.SectionBlock;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -102,12 +103,6 @@ public class PdfIndexingService {
             throw new RuntimeException(e);
         }
     }
-
-    /**
-     * 섹션 단위 텍스트 블록
-     * section: "MAIN" | "LAW" | "PRECEDENT"
-     */
-    private record SectionBlock(String section, String text) {}
 
     /**
      * 페이지 텍스트를 MAIN/LAW/PRECEDENT 구간으로 분리

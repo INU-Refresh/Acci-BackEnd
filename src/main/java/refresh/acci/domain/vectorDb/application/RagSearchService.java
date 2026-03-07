@@ -2,6 +2,7 @@ package refresh.acci.domain.vectorDb.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkHit;
 import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkRow;
 import refresh.acci.domain.vectorDb.presentation.dto.res.RagInfoResponse;
 import refresh.acci.domain.analysis.model.Analysis;
@@ -36,8 +37,8 @@ public class RagSearchService {
         laws.forEach(r -> merged.putIfAbsent(r.id(), r));
         precedents.forEach(r -> merged.putIfAbsent(r.id(), r));
 
-        List<RagInfoResponse.LegalChunkHit> hits = merged.values().stream()
-                .map(r -> new RagInfoResponse.LegalChunkHit(
+        List<LegalChunkHit> hits = merged.values().stream()
+                .map(r -> new LegalChunkHit(
                         r.id(),
                         r.accidentType(),
                         r.docName(),

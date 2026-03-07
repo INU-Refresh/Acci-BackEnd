@@ -3,6 +3,7 @@ package refresh.acci.domain.vectorDb.application;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkHit;
 import refresh.acci.domain.vectorDb.presentation.dto.res.RagInfoResponse;
 import refresh.acci.domain.vectorDb.presentation.dto.res.RagSummaryResponse;
 
@@ -67,8 +68,8 @@ public class RagSummaryService {
 
     private String buildContext(RagInfoResponse ragInfoResponse) {
         // distance 기준으로 상위 5개 hit만 사용
-        List<RagInfoResponse.LegalChunkHit> hits = ragInfoResponse.hits().stream()
-                .sorted(Comparator.comparingDouble(RagInfoResponse.LegalChunkHit::distance))
+        List<LegalChunkHit> hits = ragInfoResponse.hits().stream()
+                .sorted(Comparator.comparingDouble(LegalChunkHit::distance))
                 .limit(5)
                 .toList();
 

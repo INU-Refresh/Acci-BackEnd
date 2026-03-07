@@ -2,6 +2,7 @@ package refresh.acci.domain.analysis.adapter.in.web.dto.res;
 
 import refresh.acci.domain.analysis.model.Analysis;
 import refresh.acci.domain.analysis.model.enums.AnalysisStatus;
+import refresh.acci.domain.analysis.model.enums.RagStatus;
 import refresh.acci.domain.vectorDb.presentation.dto.res.RagSummaryResponse;
 
 import java.util.UUID;
@@ -22,6 +23,8 @@ public record AnalysisResultResponse(
 
         AnalysisStatus analysisStatus,
 
+        RagStatus ragStatus,
+
         boolean isCompleted
 
 ) {
@@ -34,6 +37,7 @@ public record AnalysisResultResponse(
                 AccidentTypeResponse.of(analysis.getAccidentType()),
                 ragSummaryResponse,
                 analysis.getAnalysisStatus(),
+                analysis.getRagStatus(),
                 analysis.isCompleted()
         );
     }

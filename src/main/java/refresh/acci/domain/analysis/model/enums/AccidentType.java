@@ -112,7 +112,7 @@ public enum AccidentType {
 
     public static AccidentType fromInt(int accidentType) {
         for (AccidentType type : AccidentType.values()) {
-            if (type.getAccidentType() == accidentType) {
+            if (type.getAccidentType().equals(accidentType)) {
                 return type;
             }
         }

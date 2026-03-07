@@ -3,6 +3,7 @@ package refresh.acci.domain.analysis.application.usecase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.analysis.adapter.in.web.dto.res.AccidentAiResultResponse;
 import refresh.acci.domain.analysis.adapter.in.web.dto.res.AnalysisResultResponse;
 import refresh.acci.domain.analysis.application.port.out.AnalysisRepositoryPort;
@@ -33,6 +34,7 @@ public class AnalysisResultUseCase {
     private final RagSearchService ragSearchService;
     private final RagSummaryService ragSummaryService;
 
+    @Transactional
     public AnalysisResultResponse getAnalysisResult(UUID analysisId, CustomUserDetails userDetails) {
         Analysis analysis = analysisRepository.getById(analysisId);
         if (analysis.getAnalysisStatus() != AnalysisStatus.COMPLETED) {

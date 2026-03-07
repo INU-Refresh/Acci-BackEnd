@@ -75,7 +75,7 @@ public class RagSearchService {
 
     private int normalizeForSearch(AccidentType t) {
         if (t == null) throw new CustomException(ErrorCode.ACCIDENT_TYPE_NOT_DETECTED);
-        int i = t.ordinal();
+        int i = t.getAccidentType();
         return switch (i) {
             case 8 -> 7;
             case 0 -> 1;

@@ -111,10 +111,11 @@ public enum AccidentType {
     private final String vehicleADirection;
 
     public static AccidentType fromInt(int accidentType) {
-        AccidentType[] values = AccidentType.values();
-        if (accidentType < 0 || accidentType >= values.length) {
-            throw new CustomException(ErrorCode.ACCIDENT_TYPE_NOT_DETECTED);
+        for (AccidentType type : AccidentType.values()) {
+            if (type.getAccidentType() == accidentType) {
+                return type;
+            }
         }
-        return values[accidentType];
+        throw new CustomException(ErrorCode.ACCIDENT_TYPE_NOT_DETECTED);
     }
 }

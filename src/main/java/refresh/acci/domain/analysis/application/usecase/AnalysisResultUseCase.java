@@ -75,6 +75,7 @@ public class AnalysisResultUseCase {
 
         if (lawAndPrecedentPort.saveRelatedLawsAndPrecedents(analysisId, summary)) {
             analysisRepository.markRagDone(analysisId);
+            analysisRepository.setAnalysisSummary(analysisId, summary.accidentSituation(), summary.accidentExplain());
         } else {
             analysisRepository.markRagFailed(analysisId);
         }

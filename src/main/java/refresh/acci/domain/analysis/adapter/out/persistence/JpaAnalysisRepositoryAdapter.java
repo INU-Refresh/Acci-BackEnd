@@ -65,7 +65,15 @@ public class JpaAnalysisRepositoryAdapter implements AnalysisRepositoryPort {
     public void markRagFailed(UUID analysisId) {
         int updated = analysisRepository.markRagFail(analysisId);
         if (updated == 0) {
-            log.warn("markRagFail skipped. id={}, status not IN_PROGRESS?", analysisId);
+            log.warn("markRagFail skipped. id={}", analysisId);
+        }
+    }
+
+    @Override
+    public void setAnalysisSummary(UUID analysisId, String accidentSituation, String accidentExplain) {
+        int updated = analysisRepository.setAnalysisSummary(analysisId, accidentSituation, accidentExplain);
+        if (updated == 0) {
+            log.warn("setAnalysisSummary skipped. id={}", analysisId);
         }
     }
 }

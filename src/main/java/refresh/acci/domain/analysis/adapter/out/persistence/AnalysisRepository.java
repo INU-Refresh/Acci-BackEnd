@@ -27,4 +27,11 @@ public interface AnalysisRepository extends JpaRepository<Analysis, UUID> {
     @Query("UPDATE Analysis a SET a.ragStatus = 'FAILED' " +
             "WHERE a.id = :analysisId AND a.ragStatus = 'IN_PROGRESS'")
     int markRagFail(@Param("analysisId") UUID analysisId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Analysis a SET a.accidentSituation = :accidentSituation, a.accidentExplain = :accidentExplain " +
+            "WHERE a.id = :analysisId")
+    int setAnalysisSummary(@Param("analysisId") UUID analysisId,
+                           @Param("accidentSituation") String accidentSituation,
+                           @Param("accidentExplain") String accidentExplain);
 }

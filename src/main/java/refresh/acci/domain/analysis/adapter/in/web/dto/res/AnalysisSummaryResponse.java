@@ -7,11 +7,17 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record AnalysisSummaryResponse(
+
         UUID analysisId,
+
         AnalysisStatus analysisStatus,
+
         boolean isCompleted,
+
         Long accidentRateA,
+
         Long accidentRateB,
+
         LocalDateTime createdAt
 ) {
     public static AnalysisSummaryResponse from(Analysis analysis) {

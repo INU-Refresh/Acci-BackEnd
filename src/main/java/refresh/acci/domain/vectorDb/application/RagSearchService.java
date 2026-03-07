@@ -1,6 +1,7 @@
 package refresh.acci.domain.vectorDb.application;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkHit;
 import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkRow;
@@ -15,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RagSearchService {
@@ -30,6 +32,8 @@ public class RagSearchService {
         var topK = pgVectorChunkRepository.searchTopK(type, qEmb, 5);
         var laws = pgVectorChunkRepository.pickLawChunks(type, 3);
         var precedents = pgVectorChunkRepository.pickPrecedentChunks(type, 3);
+
+        log.info("RAG search: type={}, hits={}", type, topK.size());
 
         // id 기준 중복 제거 + 합치기
         Map<Long, LegalChunkRow> merged = new LinkedHashMap<>();
@@ -79,7 +83,7 @@ public class RagSearchService {
         int i = t.getAccidentType();
         return switch (i) {
             case 8 -> 7;
-            case 0 -> 1;
+            case 1 -> 0;
             case 15 -> 14;
             default -> i;
         };

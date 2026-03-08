@@ -27,7 +27,7 @@ public class PgVectorChunkRepository {
                             float[] embedding) {
         String sql = """
         INSERT INTO legal_chunks(accident_type, doc_name, page, section, case_id, chunk_text, embedding)
-        VALUES (?, ?, ?, ?, ?, ?, ?::vector)
+        VALUES (?, ?, ?, ?, ?, convert_from(?::bytea, 'UTF8'), ?::vector)
         """;
 
         jdbcTemplate.execute((java.sql.Connection con) -> {
@@ -51,11 +51,13 @@ public class PgVectorChunkRepository {
                 ps.setObject(3, page);
                 ps.setString(4, section);
                 ps.setString(5, caseId);
-                ps.setString(6, chunkText);
+
+                byte[] chunkBytes = chunkText.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                ps.setBytes(6, chunkBytes);
+
                 ps.setString(7, vectorLiteral(embedding));
                 ps.executeUpdate();
             }
-
             return null;
         });
     }

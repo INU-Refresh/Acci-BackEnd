@@ -3,10 +3,11 @@ package refresh.acci.domain.vectorDb.presentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import refresh.acci.domain.vectorDb.application.PdfIndexingService;
 import refresh.acci.domain.vectorDb.infra.PgVectorChunkRepository;
 
@@ -17,9 +18,6 @@ import java.nio.file.Path;
 @RequestMapping("/api/v1/rag")
 @Tag(name = "RAG API", description = "RAG 관련 API")
 public class RagController {
-
-    @Qualifier("vectorDbJdbcTemplate")
-    private final JdbcTemplate vectorJdbc;
 
     private final PdfIndexingService pdfIndexingService;
     private final PgVectorChunkRepository repo;
@@ -35,10 +33,5 @@ public class RagController {
     ) throws Exception {
         pdfIndexingService.indexPdf(Path.of(path), docName, startPage, endPage);
         return "done. count=" + repo.countChunks();
-    }
-
-    @GetMapping("/api/v1/rag/debug/pg-encoding")
-    public String pgEncoding() {
-        return vectorJdbc.queryForObject("SHOW client_encoding", String.class);
     }
 }

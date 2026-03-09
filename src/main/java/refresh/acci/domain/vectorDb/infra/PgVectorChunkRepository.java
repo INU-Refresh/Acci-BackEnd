@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import refresh.acci.domain.vectorDb.presentation.dto.res.LegalChunkRow;
 
+import java.util.HexFormat;
 import java.util.List;
 
 @Slf4j
@@ -53,6 +54,13 @@ public class PgVectorChunkRepository {
                 ps.setString(5, caseId);
 
                 byte[] chunkBytes = chunkText.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+                // (임시)
+                if (docName.equals("car_accident_law.pdf") && (page == 230 || page == 232)) {
+                    log.warn("[DBG-DB] page={} section={} bytesLen={} headHex={}",
+                            page, section, chunkBytes.length,
+                            HexFormat.of().formatHex(chunkBytes, 0, Math.min(200, chunkBytes.length)));
+                }
                 ps.setBytes(6, chunkBytes);
 
                 ps.setString(7, vectorLiteral(embedding));

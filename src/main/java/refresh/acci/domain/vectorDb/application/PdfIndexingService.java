@@ -1,11 +1,13 @@
 package refresh.acci.domain.vectorDb.application;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 import refresh.acci.domain.vectorDb.infra.PgVectorChunkRepository;
 import refresh.acci.domain.vectorDb.presentation.dto.res.SectionBlock;
+import refresh.acci.domain.vectorDb.utils.TextDebugUtil;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PdfIndexingService {
@@ -87,15 +90,36 @@ public class PdfIndexingService {
 
                 // 섹션 단위로 저장
                 for (SectionBlock block : blocks) {
+
+                    // (임시)
+                    int chunkIdx = 0;
+
                     String blockText = sanitizeForPostgres(block.text());
                     // 섹션 텍스트가 너무 짧으면 저장 의미가 떨어져서 skip
                     if (blockText.isBlank() || blockText.length() < 30) continue;
 
                     // 섹션 텍스트를 chunk로 자른다
                     for (String chunk : chunk(blockText, 2000, 250)) {
+                        // (임시)
+                        chunkIdx++;
+                        String rawChunk = chunk;
+
                         chunk = sanitizeForPostgres(chunk);
+
                         // 임베딩 생성
                         float[] emb = geminiEmbeddingService.embed(chunk);
+
+                        // (임시)
+                        boolean debugTarget =
+                                (page == 230 && "LAW".equals(block.section()) && chunkIdx <= 3)
+                                        || (page == 232 && "MAIN".equals(block.section()) && chunkIdx <= 3);
+                        if (debugTarget) {
+                            log.warn("[DBG] page={} section={} chunkIdx={} len={}", page, block.section(), chunkIdx, chunk.length());
+                            log.warn("[DBG] utf8Hex(400)={}", TextDebugUtil.utf8Hex(chunk, 400));
+                            log.warn("[DBG] cps(120)={}", TextDebugUtil.codePointDump(chunk, 120));
+                            log.warn("[DBG-RAW]  utf8Hex(200)={}", TextDebugUtil.utf8Hex(rawChunk, 200));
+                            log.warn("[DBG-SAFE] utf8Hex(200)={}", TextDebugUtil.utf8Hex(chunk, 200));
+                        }
 
                         // DB에 저장
                         pgVectorChunkRepository.insertChunk(

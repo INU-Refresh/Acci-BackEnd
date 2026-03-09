@@ -92,7 +92,7 @@ public class AnalysisResultUseCase {
             RagInfoResponse ragInfoResponse = ragSearchService.search(analysis);
             return ragSummaryService.summarize(ragInfoResponse);
         } catch (Exception e) {
-            log.warn("RAG summarization failed: {}", e.getMessage());
+            log.warn("RAG summarization failed", e);
             return null;
         }
     }

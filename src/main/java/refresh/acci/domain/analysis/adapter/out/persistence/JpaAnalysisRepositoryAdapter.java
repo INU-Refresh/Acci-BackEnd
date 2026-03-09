@@ -70,6 +70,14 @@ public class JpaAnalysisRepositoryAdapter implements AnalysisRepositoryPort {
     }
 
     @Override
+    public void markRagNone(UUID analysisId) {
+        int updated = analysisRepository.markRagNone(analysisId);
+        if (updated == 0) {
+            log.warn("markRagFail skipped. id={}", analysisId);
+        }
+    }
+
+    @Override
     public void setAnalysisSummary(UUID analysisId, String accidentSituation, String accidentExplain) {
         int updated = analysisRepository.setAnalysisSummary(analysisId, accidentSituation, accidentExplain);
         if (updated == 0) {

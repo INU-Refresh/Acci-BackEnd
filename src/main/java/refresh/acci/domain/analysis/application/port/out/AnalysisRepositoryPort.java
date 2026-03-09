@@ -13,5 +13,6 @@ public interface AnalysisRepositoryPort {
     boolean tryMarkRagInProgress(UUID analysisId);
     void markRagDone(UUID analysisId);
     void markRagFailed(UUID analysisId);
+    void markRagNone(UUID analysisId);
     void setAnalysisSummary(UUID analysisId, String accidentSituation, String accidentExplain);
 }

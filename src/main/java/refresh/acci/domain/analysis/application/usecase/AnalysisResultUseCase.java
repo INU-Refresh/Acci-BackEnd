@@ -91,8 +91,13 @@ public class AnalysisResultUseCase {
         try {
             RagInfoResponse ragInfoResponse = ragSearchService.search(analysis);
             return ragSummaryService.summarize(ragInfoResponse);
-        } catch (Exception e) {
-            log.warn("RAG summarization failed", e);
+        } catch (CustomException e) {
+            if (e.getErrorCode() == ErrorCode.GEMINI_RATE_LIMITED) {
+                analysisRepository.markRagNone(analysis.getId());
+                throw e;
+            }
+            analysisRepository.markRagFailed(analysis.getId());
+            log.warn("RAG summarization failed: code={}", e.getMessage(), e);
             return null;
         }
     }

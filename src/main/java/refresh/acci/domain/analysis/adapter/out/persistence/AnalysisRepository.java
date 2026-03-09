@@ -29,6 +29,11 @@ public interface AnalysisRepository extends JpaRepository<Analysis, UUID> {
     int markRagFail(@Param("analysisId") UUID analysisId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Analysis a SET a.ragStatus = 'NONE' " +
+            "WHERE a.id = :analysisId")
+    int markRagNone(UUID analysisId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Analysis a SET a.accidentSituation = :accidentSituation, a.accidentExplain = :accidentExplain " +
             "WHERE a.id = :analysisId")
     int setAnalysisSummary(@Param("analysisId") UUID analysisId,

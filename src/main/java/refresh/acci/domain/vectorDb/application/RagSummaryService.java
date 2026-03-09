@@ -45,7 +45,7 @@ public class RagSummaryService {
                 가능한 경우 각 항목 끝에 [문서명 p.X] 형태로 출처를 붙여라.
                 반드시 JSON만 출력해라. (코드블록 금지, 설명 금지, 앞뒤 텍스트 금지)
                 
-                ✅ 중요 규칙(환각 방지):
+                중요 규칙(환각 방지):
                 - relatedLaws / precedentCases는 '근거 텍스트'에 해당 내용이 명시적으로 있을 때만 채워라.
                 - 근거 텍스트에 관련 법규 내용이 없으면 relatedLaws는 반드시 [] 로 반환하라.
                 - 근거 텍스트에 참고 판례 내용이 없으면 precedentCases는 반드시 [] 로 반환하라.

@@ -34,7 +34,7 @@ public class GeminiGenerateClient {
      * prompt를 보내고, 모델이 출력한 텍스트를 반환
      */
     public String generateText(String prompt) {
-        String uri = "/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey;
+        String uri = "/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
         // 요청 바디: contents -> parts -> text
         var body = objectMapper.createObjectNode();

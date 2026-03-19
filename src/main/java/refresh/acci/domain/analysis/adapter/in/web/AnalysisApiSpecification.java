@@ -62,6 +62,19 @@ public interface AnalysisApiSpecification {
                                          "message": "분석이 중단되었습니다.",
                                          "errors": null
                                       }
+                                      """))),
+                    @ApiResponse(
+                            responseCode = "429",
+                            description = "분석 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponseEntity.class),
+                                    examples = @ExampleObject(value = """
+                                      {
+                                         "code": 429,
+                                         "name": "TOO_MANY_ANALYSIS_REQUESTS",
+                                         "message": "분석 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+                                         "errors": null
+                                      }
                                       """)))
             })
     ResponseEntity<AnalysisUploadResponse> analyze(

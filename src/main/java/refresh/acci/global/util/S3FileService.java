@@ -81,5 +81,4 @@ public class S3FileService {
         if (filename == null || !filename.contains(".")) return "jpg";
         return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
     }
-
 }

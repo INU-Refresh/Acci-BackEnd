@@ -73,7 +73,6 @@ public class AnalysisResultUseCase {
 
         // RAG 요약이 null인 경우 → RAG 실패로 간주하고 반환
         if (summary == null) {
-            analysisRepository.markRagFailed(analysisId);
             return AnalysisResultResponse.of(latestAnalysis, aiResult, null);
         }
 

@@ -39,7 +39,7 @@ public class S3FileService {
         );
     }
 
-    //MultipartFile 업로드 - s3Key 생성 후 반환
+    // MultipartFile 업로드 - s3Key 생성 후 반환
     public String uploadMultipartFile(String prefix, MultipartFile file) {
         try {
             String ext = extractExtension(file.getOriginalFilename());

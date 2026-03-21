@@ -30,7 +30,7 @@ class GetVideoUrlUseCaseTest {
     }
 
     @Test
-    @DisplayName("본인 분석 영상이면 presigned url을 반환한다")
+    @DisplayName("본인 분석 영상이면 presigned url을 반환한다.")
     void getVideoUrl() {
         // given
         UUID analysisId = UUID.randomUUID();
@@ -121,7 +121,7 @@ class GetVideoUrlUseCaseTest {
         verify(videoStorage, never()).generatePresignedUrl(anyString(), any());
     }
 
-     @Test
+    @Test
     @DisplayName("영상 S3 Key가 빈 문자열이면 VIDEO_NOT_FOUND 예외가 발생한다.")
     void getVideoUrl_fail_whenVideoS3KeyIsBlank() {
         // given

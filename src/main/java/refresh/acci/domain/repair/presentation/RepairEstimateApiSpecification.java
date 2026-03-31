@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateCreateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
@@ -82,6 +83,35 @@ public interface RepairEstimateApiSpecification {
             @AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(
+            summary = "[SSE 구독] 수리비 견적 상태 조회",
+            description = "수리비 견적 처리 상태를 SSE(Server-Sent Events)로 구독합니다. <br><br>" +
+                    "클라이언트는 이 엔드포인트에 연결하여 실시간으로 견적 상태 업데이트를 받을 수 있습니다. <br><br>" +
+                    "**SSE 이벤트:** <br>" +
+                    "- `status`: 상태 변경 알림 (PENDING → PROCESSING → COMPLETED / FAILED) <br><br>" +
+                    "COMPLETED 또는 FAILED 이벤트 전송 후 연결이 자동 종료됩니다. <br>" +
+                    "COMPLETED 수신 후 상세 결과는 단건 조회 API를 사용하세요.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "SSE 구독 성공",
+                            content = @Content(mediaType = "text/event-stream")),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "견적을 찾을 수 없음",
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponseEntity.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "code": 404,
+                                                "name": "REPAIR_ESTIMATE_NOT_FOUND",
+                                                "message": "수리비 견적을 찾을 수 없습니다.",
+                                                "errors": null
+                                            }
+                                            """)))
+            })
+    SseEmitter subscribe(@PathVariable UUID repairEstimateId);
+
+    @Operation(
             summary = "수리비 견적 조회",
             description = "생성된 수리비 견적의 상세 정보를 조회합니다. <br><br>" +
                     "차량 정보, 손상 내역, 부위별 수리 항목, 총 견적 금액을 제공합니다.",
@@ -118,29 +148,13 @@ public interface RepairEstimateApiSpecification {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "수리비 견적 기록 조회 성공",
+                            description = "수리비 견적 페이징 조회 성공",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = PageResponse.class))),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "인증되지 않은 사용자",
-                            content = @Content(
-                                    schema = @Schema(implementation = ErrorResponseEntity.class),
-                                    examples = @ExampleObject(value = """
-                                            {
-                                                "code": 401,
-                                                "name": "JWT_ENTRY_POINT",
-                                                "message": "인증되지 않은 사용자입니다.",
-                                                "errors": null
-                                            }
-                                            """)))
+                                    schema = @Schema(implementation = RepairEstimateSummaryResponse.class)))
             })
     ResponseEntity<PageResponse<RepairEstimateSummaryResponse>> getEstimates(
-            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
             @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 크기", example = "5")
             @RequestParam(defaultValue = "5") int size,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    );
+            @AuthenticationPrincipal CustomUserDetails userDetails);
 }

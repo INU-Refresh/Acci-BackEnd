@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import refresh.acci.domain.repair.application.facade.RepairEstimateFacade;
+import refresh.acci.domain.repair.application.service.RepairEstimateSseService;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateCreateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class RepairEstimateController implements RepairEstimateApiSpecification{
 
     private final RepairEstimateFacade repairEstimateFacade;
+    private final RepairEstimateSseService sseService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RepairEstimateCreateResponse> createEstimate(
@@ -33,6 +36,11 @@ public class RepairEstimateController implements RepairEstimateApiSpecification{
     ) {
         RepairEstimateCreateResponse response = repairEstimateFacade.createEstimate(request, images, userDetails.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping(value = "{repairEstimateId}/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribe(@PathVariable UUID repairEstimateId) {
+        return sseService.subscribe(repairEstimateId);
     }
 
     @GetMapping("/{repairEstimateId}")

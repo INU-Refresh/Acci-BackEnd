@@ -1,4 +1,4 @@
-package refresh.acci.domain.repair.application;
+package refresh.acci.domain.repair.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +26,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -41,43 +42,41 @@ public class RepairEstimateWorkerService {
     private final RepairEstimateLlmClient llmClient;
     private final RepairPromptBuilder promptBuilder;
     private final S3FileService s3FileService;
+    private final RepairEstimateSseService sseService;
 
     @Transactional
     public void processEstimate(UUID estimateId) {
-        try {
-            //RepairEstimate 조회
-            RepairEstimate estimate = getEstimateById(estimateId);
+        //RepairEstimate 조회
+        RepairEstimate estimate = getEstimateById(estimateId);
 
-            //PROCESSING 상태로 변경
-            estimate.startProcessing();
-            estimateRepository.flush();
+        //PROCESSING 상태로 변경
+        estimate.startProcessing();
+        estimateRepository.flush();
 
-            //DamageDetail 조회
-            List<DamageDetail> damageDetails = damageDetailRepository.findByRepairEstimateId(estimateId);
+        //SSE로 PROCESSING 상태 전송
+        sseService.sendStatus(estimate);
 
-            //이미지 base64 변환
-            List<String> imagesBase64 = resolveImagesBase64(estimate.getImageS3Keys());
+        //DamageDetail 조회
+        List<DamageDetail> damageDetails = damageDetailRepository.findByRepairEstimateId(estimateId);
 
-            //LLM 호출
-            RepairEstimateLlmResponse llmResponse = callLlm(estimate.getVehicleInfo(), damageDetails, imagesBase64);
-            log.info("LLM response repairItems: {}", llmResponse.getRepairItems());
+        //이미지 base64 변환
+        List<String> imagesBase64 = resolveImagesBase64(estimate.getImageS3Keys());
 
-            //RepairItem 저장
-            saveRepairItems(estimateId, llmResponse.getRepairItems());
+        //LLM 호출
+        RepairEstimateLlmResponse llmResponse = callLlm(estimate.getVehicleInfo(), damageDetails, imagesBase64);
+        log.info("LLM response repairItems: {}", llmResponse.getRepairItems());
 
-            //총 금액 계산
-            long totalCost = llmResponse.getRepairItems().stream()
-                    .mapToLong(RepairEstimateLlmResponse.RepairItem::getCost)
-                    .sum();
+        //RepairItem 저장
+        saveRepairItems(estimateId, llmResponse.getRepairItems());
 
-            //COMPLETED 상태로 변경
-            estimate.completeEstimate(totalCost);
-            log.info("수리비 견적 처리 완료 - estimateId: {}, totalEstimate: {}", estimateId, totalCost);
+        //총 금액 계산
+        long totalCost = llmResponse.getRepairItems().stream()
+                .mapToLong(RepairEstimateLlmResponse.RepairItem::getCost)
+                .sum();
 
-        } catch (Exception e) {
-            log.error("수리비 견적 처리 실패 - estimateId: {}", estimateId, e);
-            handleFailure(estimateId);
-        }
+        //COMPLETED 상태로 변경
+        estimate.completeEstimate(totalCost);
+        log.info("수리비 견적 처리 완료 - estimateId: {}, totalEstimate: {}", estimateId, totalCost);
     }
 
     //S3 키 리스트로 이미지 base64 리스트 변환
@@ -86,7 +85,7 @@ public class RepairEstimateWorkerService {
 
         return imageS3Keys.stream()
                 .map(this::resolveImageBase64)
-                .filter(base64 -> base64 != null)
+                .filter(Objects::nonNull)
                 .toList();
     }
 

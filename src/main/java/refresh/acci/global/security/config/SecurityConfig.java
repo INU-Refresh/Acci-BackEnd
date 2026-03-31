@@ -122,6 +122,9 @@ public class SecurityConfig {
             //사고 영상 분석
             "/api/v1/analyses/loading",
 
+            //수리비 견적 SSE 구독
+            "/api/v1/repair-estimates/*/events",
+
             //Actuator(로드밸런서용)
             "/actuator/health"
     };

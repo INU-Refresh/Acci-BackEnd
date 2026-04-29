@@ -99,6 +99,7 @@ public class Analysis extends BaseTime {
     }
 
     public void completeAnalysisFromAi(AiResultResponse result) {
+        this.aiJobId = result.job_id();
         this.accidentType = AccidentType.fromInt(result.accident_type());
         this.accidentRateA = (long) result.vehicle_A_fault();
         this.accidentRateB = (long) result.vehicle_B_fault();

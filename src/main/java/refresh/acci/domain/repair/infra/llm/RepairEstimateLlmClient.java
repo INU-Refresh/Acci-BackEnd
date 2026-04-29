@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import refresh.acci.domain.repair.infra.llm.dto.ImageData;
 import refresh.acci.domain.repair.infra.llm.dto.OpenAiRequest;
 import refresh.acci.domain.repair.infra.llm.dto.OpenAiResponse;
 import refresh.acci.domain.repair.infra.llm.dto.RepairEstimateLlmResponse;
@@ -52,8 +53,8 @@ public class RepairEstimateLlmClient {
     }
 
     //penAI API를 호출하여 수리비 견적을 생성
-    public RepairEstimateLlmResponse call(String systemMessage, String userPrompt, List<String> imagesBase64) {
-        OpenAiRequest requestBody = buildRequestBody(systemMessage, userPrompt, imagesBase64);
+    public RepairEstimateLlmResponse call(String systemMessage, String userPrompt, List<ImageData> imagesData) {
+        OpenAiRequest requestBody = buildRequestBody(systemMessage, userPrompt, imagesData);
 
         try {
             String responseString = webClient.post()
@@ -85,8 +86,8 @@ public class RepairEstimateLlmClient {
     }
 
     //OpenAI 요청 바디 생성
-    private OpenAiRequest buildRequestBody(String systemMessage, String userPrompt, List<String> imagesBase64) {
-        OpenAiRequest.Message userMessage = buildUserMessage(userPrompt, imagesBase64);
+    private OpenAiRequest buildRequestBody(String systemMessage, String userPrompt, List<ImageData> imagesData) {
+        OpenAiRequest.Message userMessage = buildUserMessage(userPrompt, imagesData);
 
         return OpenAiRequest.builder()
                 .model(model)
@@ -103,17 +104,17 @@ public class RepairEstimateLlmClient {
     }
 
     //이미지 유무에 따라 user 메시지 구성
-    private OpenAiRequest.Message buildUserMessage(String userPrompt, List<String> imagesBase64) {
+    private OpenAiRequest.Message buildUserMessage(String userPrompt, List<ImageData> imagesData) {
         //이미지 없으면 텍스트만
-        if (imagesBase64 == null || imagesBase64.isEmpty()) {
+        if (imagesData == null || imagesData.isEmpty()) {
             return new OpenAiRequest.Message(USER_ROLE, userPrompt);
         }
 
         //텍스트 + 이미지 배열
         List<OpenAiRequest.ContentPart> contentParts = new ArrayList<>();
         contentParts.add(OpenAiRequest.ContentPart.ofText(userPrompt));
-        imagesBase64.forEach(imageBase64 ->
-                contentParts.add(OpenAiRequest.ContentPart.ofImage(imageBase64, "image/jpeg")));
+        imagesData.forEach(imageData ->
+                contentParts.add(OpenAiRequest.ContentPart.ofImage(imageData.base64(), imageData.mediaType())));
 
         return new OpenAiRequest.Message(USER_ROLE, contentParts);
     }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import refresh.acci.domain.repair.infra.llm.RepairEstimateLlmClient;
 import refresh.acci.domain.repair.infra.llm.RepairPromptBuilder;
+import refresh.acci.domain.repair.infra.llm.dto.ImageData;
 import refresh.acci.domain.repair.infra.llm.dto.RepairEstimateLlmRequest;
 import refresh.acci.domain.repair.infra.llm.dto.RepairEstimateLlmResponse;
 import refresh.acci.domain.repair.infra.persistence.DamageDetailRepository;
@@ -60,10 +61,10 @@ public class RepairEstimateWorkerService {
         List<DamageDetail> damageDetails = damageDetailRepository.findByRepairEstimateId(estimateId);
 
         //이미지 base64 변환
-        List<String> imagesBase64 = resolveImagesBase64(estimate.getImageS3Keys());
+        List<ImageData> imagesData = resolveImagesData(estimate.getImageS3Keys());
 
         //LLM 호출
-        RepairEstimateLlmResponse llmResponse = callLlm(estimate.getVehicleInfo(), damageDetails, imagesBase64);
+        RepairEstimateLlmResponse llmResponse = callLlm(estimate.getVehicleInfo(), damageDetails, imagesData);
         log.info("LLM response repairItems: {}", llmResponse.getRepairItems());
 
         //RepairItem 저장
@@ -79,30 +80,40 @@ public class RepairEstimateWorkerService {
         log.info("수리비 견적 처리 완료 - estimateId: {}, totalEstimate: {}", estimateId, totalCost);
     }
 
-    //S3 키 리스트로 이미지 base64 리스트 변환
-    private List<String> resolveImagesBase64(List<String> imageS3Keys) {
+    //S3 키 리스트로 이미지 리스트 변환
+    private List<ImageData> resolveImagesData(List<String> imageS3Keys) {
         if (imageS3Keys == null || imageS3Keys.isEmpty()) return List.of();
 
         return imageS3Keys.stream()
-                .map(this::resolveImageBase64)
+                .map(this::resolveImageData)
                 .filter(Objects::nonNull)
                 .toList();
     }
 
-    //S3 키 하나를 presigned URL -> 이미지 다운로드 -> base64 변환
-    private String resolveImageBase64(String imageS3Key) {
+    //S3 키 하나를 presigned URL -> 이미지 다운로드
+    private ImageData resolveImageData(String imageS3Key) {
         if (imageS3Key == null || imageS3Key.isBlank()) return null;
 
         try {
             String presignedUrl = s3FileService.generatePresignedUrl(imageS3Key, PRESIGNED_URL_TTL);
             try (InputStream inputStream = URI.create(presignedUrl).toURL().openStream()) {
                 byte[] imageBytes = inputStream.readAllBytes();
-                return Base64.getEncoder().encodeToString(imageBytes);
+                String base64 = Base64.getEncoder().encodeToString(imageBytes);
+                String mediaType = resolveMediaType(imageS3Key);
+                return ImageData.of(base64, mediaType);
             }
         } catch (IOException e) {
             log.warn("이미지 다운로드 실패 - s3Key: {}, 해당 이미지 제외 후 진행", imageS3Key, e);
             return null;
         }
+    }
+
+    //동적 변환
+    private String resolveMediaType(String imageS3Key) {
+        String lower = imageS3Key.toLowerCase();
+        if (lower.endsWith(".png")) return "image/png";
+        if (lower.endsWith(".webp")) return "image/webp";
+        return "image/jpeg"; // jpg, jpeg 기본값
     }
 
     //RepairEstimate 조회
@@ -115,11 +126,11 @@ public class RepairEstimateWorkerService {
     }
 
     //LLM 호출
-    private RepairEstimateLlmResponse callLlm(VehicleInfo vehicleInfo, List<DamageDetail> damageDetails, List<String> imagesBase64) {
+    private RepairEstimateLlmResponse callLlm(VehicleInfo vehicleInfo, List<DamageDetail> damageDetails, List<ImageData> imagesData) {
         RepairEstimateLlmRequest llmRequest = promptBuilder.toLlmRequest(vehicleInfo, damageDetails);
         String systemMessage = promptBuilder.buildSystemMessage();
         String userPrompt = promptBuilder.buildUserPrompt(llmRequest);
-        return llmClient.call(systemMessage, userPrompt, imagesBase64);
+        return llmClient.call(systemMessage, userPrompt, imagesData);
     }
 
     //RepairItem Entity 저장

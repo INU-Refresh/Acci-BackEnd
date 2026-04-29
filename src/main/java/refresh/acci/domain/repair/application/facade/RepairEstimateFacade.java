@@ -26,6 +26,8 @@ import refresh.acci.domain.repair.presentation.dto.RepairEstimateRequest;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateResponse;
 import refresh.acci.domain.repair.presentation.dto.RepairEstimateSummaryResponse;
 import refresh.acci.global.common.PageResponse;
+import refresh.acci.global.exception.CustomException;
+import refresh.acci.global.exception.ErrorCode;
 import refresh.acci.global.util.S3FileService;
 
 import java.time.Duration;
@@ -39,6 +41,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RepairEstimateFacade {
+
+    private static final int MAX_IMAGE_COUNT = 5;
 
     private final RepairEstimateQueryService queryService;
     private final RepairEstimateCommandService commandService;
@@ -65,6 +69,7 @@ public class RepairEstimateFacade {
 
         //이미지 S3 업로드
         if (images != null && !images.isEmpty()) {
+            validateImageCount(images);
             uploadImages(estimate, images);
         }
 
@@ -114,10 +119,17 @@ public class RepairEstimateFacade {
         return PageResponse.of(responsePage);
     }
 
+
+    //이미지 갯수 제한
+    private void validateImageCount(List<MultipartFile> images) {
+        if (images.size() > MAX_IMAGE_COUNT) {
+            throw new CustomException(ErrorCode.REPAIR_ESTIMATE_IMAGE_LIMIT_EXCEEDED);
+        }
+    }
+
     //이미지 S3 업로드 후 엔티티에 S3 키 저장
     private void uploadImages(RepairEstimate estimate, List<MultipartFile> images) {
         List<String> s3Keys = images.stream()
-                .filter(image -> image != null && !image.isEmpty())
                 .map(image -> s3FileService.uploadMultipartFile("repair-estimate/" + estimate.getId(), image))
                 .toList();
 

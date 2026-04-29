@@ -28,9 +28,9 @@ public class ProcessAnalysisAIJobUseCase {
     private final TempFilePort tempFilePort;
 
     @Value("${ai.max-attempts}")
-    private static final int MAX_ATTEMPTS = 60; // 최대 3분 대기 (3초 간격 * 60회)
+    private int maxAttempts;
     @Value("${ai.interval-ms}")
-    private static final long INTERVAL_MS = 3000L;
+    private long intervalMs;
 
     public void runAnalysis(UUID analysisId, Path tempFilePath) {
         try {
@@ -67,7 +67,7 @@ public class ProcessAnalysisAIJobUseCase {
     }
 
     public void poll(UUID analysisId, String jobId) {
-        for (int i = 0; i < MAX_ATTEMPTS; i++) {
+        for (int i = 0; i < maxAttempts; i++) {
             AiStatusResponse status = aiClient.getStatus(jobId);
 
             if ("completed".equals(status.status())) {
@@ -84,7 +84,7 @@ public class ProcessAnalysisAIJobUseCase {
                 return;
             }
 
-            sleep(INTERVAL_MS);
+            sleep(intervalMs);
         }
 
         log.warn("AI 분석 시간 초과 (jobId={})", jobId);

@@ -28,3 +28,6 @@ application.yml
 ### Others ###
 bin/
 HELP.md
+
+### Claude Code ###
+.claude/

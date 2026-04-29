@@ -37,7 +37,7 @@ public class AnalysisResultUseCase {
     @Transactional
     public AnalysisResultResponse getAnalysisResult(UUID analysisId, CustomUserDetails userDetails) {
         Analysis analysis = analysisRepository.getById(analysisId);
-        if (analysis.getAnalysisStatus() != AnalysisStatus.COMPLETED) {
+        if (analysis.getAnalysisStatus() == AnalysisStatus.PROCESSING) {
             throw new CustomException(ErrorCode.ANALYSIS_NOT_COMPLETED);
         }
 

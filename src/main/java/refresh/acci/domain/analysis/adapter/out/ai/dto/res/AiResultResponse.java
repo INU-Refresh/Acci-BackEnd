@@ -8,13 +8,7 @@ public record AiResultResponse(
 
         int vehicle_B_fault,
 
-        String place,
-
-        String situation,
-
-        String vehicle_a,
-
-        String vehicle_b
+        ClassificationInfoResponse classification_info
 
 ) {
 }

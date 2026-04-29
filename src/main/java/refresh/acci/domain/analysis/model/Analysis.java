@@ -102,10 +102,10 @@ public class Analysis extends BaseTime {
         this.accidentType = AccidentType.fromInt(result.accident_type());
         this.accidentRateA = (long) result.vehicle_A_fault();
         this.accidentRateB = (long) result.vehicle_B_fault();
-        this.place = result.place();
-        this.situation = result.situation();
-        this.vehicleASituation = result.vehicle_a();
-        this.vehicleBSituation = result.vehicle_b();
+        this.place = result.classification_info().place();
+        this.situation = result.classification_info().situation();
+        this.vehicleASituation = result.classification_info().vehicle_a();
+        this.vehicleBSituation = result.classification_info().vehicle_b();
         this.analysisStatus = AnalysisStatus.COMPLETED;
         this.isCompleted = true;
     }

@@ -117,7 +117,7 @@ public interface AnalysisApiSpecification {
                             responseCode = "200",
                             description = "영상 분석 결과 조회 성공",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = AnalysisUploadResponse.class))),
+                                    schema = @Schema(implementation = AnalysisResultResponse.class))),
                     @ApiResponse(
                             responseCode = "404",
                             description = "분석을 찾을 수 없습니다.",

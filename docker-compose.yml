@@ -96,15 +96,9 @@ services:
     networks:
       - monitoring
 
-  # ─── 부하 테스트 전용 (load-test 프로파일) ──────────────────────────────
-  # Resilience4j 적용 전후 비교를 위한 측정 환경.
+  # 부하 테스트 전용 (load-test 프로파일)
+  # Resilience4j 적용 전후 비교를 위한 측정 환경
   # 데이터 흐름: k6 → app → toxiproxy → wiremock
-  # 사용법:
-  #   docker compose --profile load-test up -d toxiproxy wiremock
-  #   ./load-test/toxiproxy/setup.sh         (upstream=wiremock:8080)
-  #   AI_SERVER_URL=http://toxiproxy:8666 (컨테이너 내부)
-  #                http://localhost:8666 (호스트에서 직접 앱 실행 시)
-  # 평상시 docker compose up 명령에는 포함되지 않으므로 운영 배포에 영향 없음.
 
   # AI 서버 장애 주입 프록시
   toxiproxy:

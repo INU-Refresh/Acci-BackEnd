@@ -29,7 +29,7 @@ load-test/
 │   └── scenarios.sh             # S1/S2/S3 시나리오 toxic 적용/해제
 ├── wiremock/
 │   └── mappings/                # AI 서버 stub 응답 정의 (analyze/status/result)
-└── results/                     # 측정 결과 저장 (git 무시)
+└── results/                     # 측정 결과 저장
 ```
 
 ---

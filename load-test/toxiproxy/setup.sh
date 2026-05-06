@@ -4,10 +4,9 @@
 # - 기존 ai-server 프록시가 있으면 삭제 후 재등록 (idempotent)
 # - upstream 기본값은 같은 docker network 의 wiremock 컨테이너
 #   (재현 가능한 응답 보장 위해 실제 AI 서버 대신 wiremock 사용)
-# - 실제 AI 서버를 사용하려면 AI_UPSTREAM 환경변수로 덮어쓰기
 #
 # 사용 예:
-#   ./load-test/toxiproxy/setup.sh                                # 기본 (wiremock)
+#   ./load-test/toxiproxy/setup.sh
 #   AI_UPSTREAM=host.docker.internal:8000 ./load-test/toxiproxy/setup.sh   # 실제 AI 서버
 # ─────────────────────────────────────────────────────────────────────
 set -euo pipefail

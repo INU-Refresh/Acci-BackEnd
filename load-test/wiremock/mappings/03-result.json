@@ -1,0 +1,26 @@
+{
+  "_comment": "AI 서버: GET /api/v1/result/{jobId} stub. 고정된 사고 분류 결과 반환 (재현성 확보).",
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v1/result/[^/]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"],
+    "jsonBody": {
+      "job_id": "{{request.path.[3]}}",
+      "accident_type": 7,
+      "vehicle_A_fault": 60,
+      "vehicle_B_fault": 40,
+      "classification_info": {
+        "place": "교차로",
+        "situation": "신호등 있는 교차로 직진 충돌",
+        "vehicle_a": "직진",
+        "vehicle_b": "직진"
+      }
+    }
+  }
+}

@@ -96,6 +96,47 @@ services:
     networks:
       - monitoring
 
+  # ─── 부하 테스트 전용 (load-test 프로파일) ──────────────────────────────
+  # Resilience4j 적용 전후 비교를 위한 측정 환경.
+  # 데이터 흐름: k6 → app → toxiproxy → wiremock
+  # 사용법:
+  #   docker compose --profile load-test up -d toxiproxy wiremock
+  #   ./load-test/toxiproxy/setup.sh         (upstream=wiremock:8080)
+  #   AI_SERVER_URL=http://toxiproxy:8666 (컨테이너 내부)
+  #                http://localhost:8666 (호스트에서 직접 앱 실행 시)
+  # 평상시 docker compose up 명령에는 포함되지 않으므로 운영 배포에 영향 없음.
+
+  # AI 서버 장애 주입 프록시
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    container_name: acci-toxiproxy
+    restart: unless-stopped
+    profiles: ["load-test"]
+    ports:
+      - "8474:8474"  # Toxiproxy 관리 API (프록시/toxic 설정용)
+      - "8666:8666"  # AI 서버 프록시 listen 포트 (앱은 이 포트로 호출)
+    networks:
+      - monitoring
+
+  # AI 서버를 흉내내는 가짜 서버 (재현 가능한 응답 보장)
+  # 실제 AI 분석 시간 변동을 제거하여 baseline/after 노이즈 최소화 목적.
+  # mappings/ 의 stub JSON 으로 응답 정의.
+  wiremock:
+    image: wiremock/wiremock:3.9.1
+    container_name: acci-wiremock
+    restart: unless-stopped
+    profiles: ["load-test"]
+    ports:
+      - "8089:8080"  # 호스트 디버깅용 (앱은 toxiproxy 경유로 호출하므로 직접 노출 불필요)
+    volumes:
+      - ./load-test/wiremock/mappings:/home/wiremock/mappings:ro
+      - ./load-test/wiremock/__files:/home/wiremock/__files:ro
+    command:
+      - "--global-response-templating"  # 동적 응답 (path param, UUID 생성 등)
+      - "--disable-banner"
+    networks:
+      - monitoring
+
 networks:
   monitoring:
     driver: bridge

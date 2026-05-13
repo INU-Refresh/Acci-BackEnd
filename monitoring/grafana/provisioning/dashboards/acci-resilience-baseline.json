@@ -1,0 +1,333 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "📊 HTTP 요청 현황 (Baseline)",
+      "type": "row"
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "요청/분",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "5xx" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "202" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 2,
+      "options": {
+        "legend": { "calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count{job=\"acci-spring-boot\", uri=\"/api/v1/analyses\", method=\"POST\"}[1m])) * 60",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "POST /api/v1/analyses — 분당 요청 수 (status별)"
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "응답시간",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 3,
+      "options": {
+        "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"acci-spring-boot\", uri=\"/api/v1/analyses\", method=\"POST\"}[1m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"acci-spring-boot\", uri=\"/api/v1/analyses\", method=\"POST\"}[1m])))",
+          "legendFormat": "p99",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"acci-spring-boot\", uri=\"/api/v1/analyses\", method=\"POST\"}[1m])))",
+          "legendFormat": "p50",
+          "refId": "C"
+        }
+      ],
+      "title": "POST /api/v1/analyses — p50 / p95 / p99 응답시간"
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "스레드 수",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "id": 4,
+      "options": {
+        "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "expr": "tomcat_threads_busy_threads{job=\"acci-spring-boot\"}",
+          "legendFormat": "busy",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "expr": "tomcat_threads_config_max_threads{job=\"acci-spring-boot\"}",
+          "legendFormat": "max",
+          "refId": "B"
+        }
+      ],
+      "title": "Tomcat busy threads (AI 장애 시 스레드 점유 확인용)"
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "메모리",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "id": 5,
+      "options": {
+        "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "expr": "jvm_memory_used_bytes{job=\"acci-spring-boot\", area=\"heap\"}",
+          "legendFormat": "heap used",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "expr": "jvm_memory_max_bytes{job=\"acci-spring-boot\", area=\"heap\"}",
+          "legendFormat": "heap max",
+          "refId": "B"
+        }
+      ],
+      "title": "JVM Heap 사용량"
+    },
+
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 },
+      "id": 10,
+      "title": "⚡ Resilience4j — 적용 후 활성화 (현재 No data 정상)",
+      "type": "row",
+      "panels": [
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "mappings": [
+                { "options": { "closed": { "color": "green", "index": 0, "text": "CLOSED" } }, "type": "value" },
+                { "options": { "open": { "color": "red", "index": 1, "text": "OPEN" } }, "type": "value" },
+                { "options": { "half_open": { "color": "yellow", "index": 2, "text": "HALF_OPEN" } }, "type": "value" }
+              ],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 18 },
+          "id": 11,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+              "expr": "resilience4j_circuitbreaker_state{job=\"acci-spring-boot\", name=\"aiClient\"}",
+              "legendFormat": "{{state}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Circuit Breaker 상태"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "lineWidth": 1,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "normal" }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 18 },
+          "id": 12,
+          "options": {
+            "legend": { "calcs": ["sum"], "displayMode": "list", "placement": "bottom" },
+            "tooltip": { "mode": "multi", "sort": "none" }
+          },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+              "expr": "sum by (kind) (rate(resilience4j_retry_calls_total{job=\"acci-spring-boot\", name=\"aiClient\"}[1m]))",
+              "legendFormat": "{{kind}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Retry 호출 종류 (successful_with_retry / failed_with_retry 등)"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineWidth": 2,
+                "showPoints": "auto",
+                "spanNulls": false
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 18 },
+          "id": 13,
+          "options": {
+            "legend": { "calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom" },
+            "tooltip": { "mode": "multi", "sort": "none" }
+          },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+              "expr": "resilience4j_bulkhead_available_concurrent_calls{job=\"acci-spring-boot\", name=\"aiClient\"}",
+              "legendFormat": "available",
+              "refId": "A"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "DS_PROMETHEUS" },
+              "expr": "resilience4j_bulkhead_max_allowed_concurrent_calls{job=\"acci-spring-boot\", name=\"aiClient\"}",
+              "legendFormat": "max",
+              "refId": "B"
+            }
+          ],
+          "title": "Bulkhead 동시 호출 슬롯"
+        }
+      ]
+    }
+
+  ],
+  "schemaVersion": 38,
+  "tags": ["acci", "resilience", "load-test"],
+  "templating": { "list": [] },
+  "time": { "from": "now-30m", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Seoul",
+  "title": "Acci — AI 서버 회복 탄력성 (Before/After)",
+  "uid": "acci-resilience-baseline",
+  "version": 1,
+  "weekStart": ""
+}

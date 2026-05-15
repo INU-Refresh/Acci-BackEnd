@@ -36,6 +36,10 @@ public enum ErrorCode {
     // Analysis
     ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "분석을 찾을 수 없습니다."),
     AI_SERVER_COMMUNICATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "AI 서버와의 통신에 실패했습니다."),
+    // 서킷 브레이커 OPEN 상태 — 빠른 실패로 스레드 차단 방지
+    AI_SERVER_CIRCUIT_OPEN(HttpStatus.SERVICE_UNAVAILABLE, 503, "AI 서버가 일시적으로 사용 불가 상태입니다. 잠시 후 다시 시도해주세요."),
+    // Bulkhead 포화 — 동시 AI 호출 한도 초과
+    AI_SERVER_BULKHEAD_FULL(HttpStatus.TOO_MANY_REQUESTS, 429, "AI 서버 처리 용량을 초과했습니다. 잠시 후 다시 시도해주세요."),
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "파일 업로드에 실패했습니다."),
     UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 파일 형식입니다."),
     TOO_MANY_ANALYSIS_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, 429, "분석 요청이 너무 많습니다. 잠시 후 다시 시도해주세요."),

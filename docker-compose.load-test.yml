@@ -39,7 +39,7 @@ services:
     command:
       - "--global-response-templating"  # 동적 응답 (UUID 생성 등)
       - "--disable-banner"
-      - "--disable-request-journal"     # 요청 로그 메모리 누적 방지 (OOM 방어)
+      - "--no-request-journal"          # 요청 로그 메모리 누적 방지 (OOM 방어, 3.x 변경된 옵션명)
     networks:
       - load-test
 

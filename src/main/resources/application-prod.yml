@@ -152,3 +152,50 @@ management:
   metrics:
     tags:
       application: acci
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      aiClient:
+        # 슬라이딩 윈도우: 최근 10회 호출 기준으로 실패율 계산
+        slidingWindowSize: 10
+        # 서킷 열기 판정에 필요한 최소 호출 수 (5회 미만이면 CLOSED 유지)
+        minimumNumberOfCalls: 5
+        # HALF_OPEN 상태에서 허용하는 테스트 호출 수
+        permittedNumberOfCallsInHalfOpenState: 3
+        # 실패율 50% 이상이면 OPEN (빠른 실패로 전환)
+        failureRateThreshold: 50
+        # 느린 호출 비율 80% 이상이면 OPEN
+        slowCallRateThreshold: 80
+        # 3초 이상 걸리는 호출을 "느린 호출"로 간주
+        slowCallDurationThreshold: 3s
+        # OPEN 상태 유지 시간 — 이후 HALF_OPEN으로 전환
+        waitDurationInOpenState: 10s
+        # /actuator/health 에 CB 상태 노출
+        registerHealthIndicator: true
+        # Bulkhead 거절은 AI 서버 문제가 아니므로 서킷 실패 카운트에서 제외
+        ignoreExceptions:
+          - io.github.resilience4j.bulkhead.BulkheadFullException
+
+  retry:
+    instances:
+      aiClient:
+        # 원본 1회 + 재시도 2회 = 최대 3회 시도
+        maxAttempts: 3
+        # 지수 백오프: 500ms → 1000ms (jitter ±50%)
+        waitDuration: 500ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        randomizedWaitFactor: 0.5
+        # 서킷 OPEN / Bulkhead 포화 예외는 재시도 없이 즉시 전파
+        ignoreExceptions:
+          - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+          - io.github.resilience4j.bulkhead.BulkheadFullException
+
+  bulkhead:
+    instances:
+      aiClient:
+        # AI 서버 동시 호출 상한 — 초과 시 BulkheadFullException
+        maxConcurrentCalls: 10
+        # 대기 없이 즉시 거절 (timeout=0)
+        maxWaitDuration: 0ms

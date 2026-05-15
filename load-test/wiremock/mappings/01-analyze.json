@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "comment": "AI 서버: POST /api/v1/analyze 에 대한 stub. 영상 업로드를 받으면 즉시 jobId 발급."
+  },
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/v1/analyze"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"],
+    "jsonBody": {
+      "job_id": "{{randomValue type='UUID'}}",
+      "status": "queued",
+      "message": "accepted"
+    }
+  }
+}

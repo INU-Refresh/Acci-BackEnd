@@ -1,0 +1,12 @@
+apiVersion: 1
+
+datasources:
+  # 로드 테스트용 datasource — host에서 실행 중인 앱을 scrape하는 prometheus-test를 바라봄
+  # (main prometheus는 Docker 컨테이너 app:8080을 scrape하므로 로컬 앱에는 적합하지 않음)
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus-test:9090
+    isDefault: true
+    editable: false
+    uid: DS_PROMETHEUS

@@ -1,5 +1,7 @@
 {
-  "_comment": "AI 서버: GET /api/v1/status/{jobId} stub. baseline 측정 단순화를 위해 즉시 completed 반환 → 폴링 1회로 종료.",
+  "metadata": {
+    "comment": "AI 서버: GET /api/v1/status/{jobId} stub. baseline 측정 단순화를 위해 즉시 completed 반환 → 폴링 1회로 종료."
+  },
   "request": {
     "method": "GET",
     "urlPathPattern": "/api/v1/status/[^/]+"

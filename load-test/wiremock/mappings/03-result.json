@@ -1,5 +1,7 @@
 {
-  "_comment": "AI 서버: GET /api/v1/result/{jobId} stub. 고정된 사고 분류 결과 반환 (재현성 확보).",
+  "metadata": {
+    "comment": "AI 서버: GET /api/v1/result/{jobId} stub. 고정된 사고 분류 결과 반환 (재현성 확보)."
+  },
   "request": {
     "method": "GET",
     "urlPathPattern": "/api/v1/result/[^/]+"

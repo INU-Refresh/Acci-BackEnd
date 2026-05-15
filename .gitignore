@@ -35,3 +35,6 @@ HELP.md
 ### Load Test 결과물 (재현 가능한 산출물이므로 커밋 제외) ###
 load-test/results/
 !load-test/results/.gitkeep
+
+### local
+monitoring/prometheus/prometheus-test.yml

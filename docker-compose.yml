@@ -96,6 +96,7 @@ services:
     networks:
       - monitoring
 
+
   # 부하 테스트 전용 (load-test 프로파일)
   # Resilience4j 적용 전후 비교를 위한 측정 환경
   # 데이터 흐름: k6 → app → toxiproxy → wiremock
@@ -128,6 +129,37 @@ services:
     command:
       - "--global-response-templating"  # 동적 응답 (path param, UUID 생성 등)
       - "--disable-banner"
+      - "--disable-request-journal"     # 요청 로그 메모리 누적 방지 (부하 테스트 시 OOM 방어)
+    networks:
+      - monitoring
+
+  # 부하 테스트용 Prometheus & Grafana (load-test 프로파일)
+  prometheus-test:
+    image: prom/prometheus:latest
+    container_name: prometheus-test
+    restart: unless-stopped
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus-test.yml:/etc/prometheus/prometheus.yml
+      - prometheus-test-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - monitoring
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana-test:
+    image: grafana/grafana:latest
+    container_name: grafana-test
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-test-data:/var/lib/grafana
+      # 로드 테스트 전용 provisioning (prometheus-test:9090 datasource 사용)
+      # main grafana의 provisioning과 분리하여 datasource URL 충돌 방지
+      - ./monitoring/grafana/provisioning-test:/etc/grafana/provisioning
     networks:
       - monitoring
 
@@ -139,3 +171,5 @@ volumes:
   prometheus-data:
   grafana-data:
   pgvector-data:
+  prometheus-test-data:
+  grafana-test-data:

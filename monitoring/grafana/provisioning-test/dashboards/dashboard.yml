@@ -1,0 +1,14 @@
+apiVersion: 1
+
+providers:
+  - name: 'Acci'
+    orgId: 1
+    folder: 'Acci'
+    folderUid: 'acci'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 10
+    allowUiUpdates: true   # Grafana UI에서 수정 후 저장 가능
+    options:
+      path: /etc/grafana/provisioning/dashboards

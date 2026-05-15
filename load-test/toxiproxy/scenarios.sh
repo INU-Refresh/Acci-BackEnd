@@ -28,11 +28,20 @@ clear_toxics() {
 }
 
 # 프록시 enabled 상태 토글
+# enabled 만 보내면 Toxiproxy 가 listen/upstream 을 빈 값으로 덮어써서 hang 발생
+# → 현재 프록시 설정 전체를 GET 한 뒤 enabled 만 교체해서 재 POST
 set_enabled() {
   local enabled="$1"
-  curl -fsS -X POST "${TOXIPROXY}/proxies/${PROXY_NAME}" \
+  local config
+  config=$(curl -fsS --max-time 5 "${TOXIPROXY}/proxies/${PROXY_NAME}")
+  echo "${config}" | python3 -c "
+import sys, json
+p = json.load(sys.stdin)
+p['enabled'] = ('${enabled}' == 'true')
+print(json.dumps(p))
+" | curl -fsS --max-time 10 -X POST "${TOXIPROXY}/proxies/${PROXY_NAME}" \
     -H "Content-Type: application/json" \
-    -d "{\"enabled\": ${enabled}}" >/dev/null
+    -d @- >/dev/null
 }
 
 case "${1:-}" in

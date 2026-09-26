@@ -38,13 +38,14 @@ public class WebClientAiClientAdapter implements AiClientPort {
     }
 
     /**
-     * 적용 순서 (Spring AOP 기본 우선순위 기준, 외->내):
-     *   Retry → CircuitBreaker → Bulkhead → 실제 호출
+     * 적용 순서 (application.yml 의 *AspectOrder 로 지정, 외->내):
+     *   CircuitBreaker → Retry → Bulkhead → 실제 호출
      *
+     * - CircuitBreaker: 재시도를 모두 거친 최종 결과만 집계. 실패율 50% 초과 시 OPEN 전환,
+     *                   OPEN 시 CallNotPermittedException 발생 → fallback 에서 원본 예외를 그대로 재throw
+     *                   (Retry 가 바깥이면 재시도 1회 1회가 실패로 누적되어 일시 장애에도 서킷이 열림)
      * - Retry: 일시 장애 시 지수 백오프 재시도 (최대 3회, 500ms → 1000ms ± jitter)
-     *          단, ignoreExceptions 로 설정된 CB open / Bulkhead full 예외는 즉시 전파
-     * - CircuitBreaker: 실패율 50% 초과 시 OPEN 전환, OPEN 시 CallNotPermittedException 발생
-     *                   fallback 에서 원본 예외를 그대로 재throw → Retry 가 ignoreExceptions 처리
+     *          Bulkhead full 예외는 ignoreExceptions 로 재시도 없이 즉시 전파
      * - Bulkhead: 동시 호출 상한(10) 초과 시 BulkheadFullException 발생
      *             CB ignoreExceptions 에 포함 → 서킷 실패 카운트 없이 즉시 전파
      */
@@ -117,10 +118,9 @@ public class WebClientAiClientAdapter implements AiClientPort {
     }
 
     // ── Fallback methods ────────────────────────────────────────────────────────
-    // CircuitBreaker OPEN 또는 실패 시 호출됨.
-    // CallNotPermittedException / BulkheadFullException 은 원본 그대로 재throw 해야
-    // Retry 의 ignoreExceptions 설정이 동작하여 재시도 없이 즉시 전파됨.
-    // CustomException 으로 감싸면 Retry 가 이를 재시도 대상으로 인식하는 문제 발생.
+    // CircuitBreaker OPEN 또는 (재시도를 모두 소진한) 최종 실패 시 호출됨.
+    // CallNotPermittedException / BulkheadFullException 은 원본 그대로 재throw 하여
+    // 호출자가 서킷 OPEN / 포화 상황을 구분할 수 있도록 함.
     private AiAnalyzeResponse requestAnalysisFallback(Path videoPath, Throwable t) {
         throw buildFallbackException("requestAnalysis", t);
     }
@@ -135,7 +135,7 @@ public class WebClientAiClientAdapter implements AiClientPort {
 
     private RuntimeException buildFallbackException(String method, Throwable t) {
         if (t instanceof CallNotPermittedException cpe) {
-            // 서킷이 OPEN 상태 — 원본 예외 재throw 로 Retry 의 ignoreExceptions 처리
+            // 서킷이 OPEN 상태 — 원본 예외 재throw
             log.warn("[AIClient] 서킷 브레이커 OPEN — 즉시 실패 (method={})", method);
             return cpe;
         }

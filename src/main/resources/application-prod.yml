@@ -155,6 +155,10 @@ management:
 
 resilience4j:
   circuitbreaker:
+    # 애스펙트 순서(값이 작을수록 바깥): CircuitBreaker(1) → Retry(2) → Bulkhead
+    # CB 가 재시도를 모두 거친 "최종 결과"만 집계하도록 Retry 보다 바깥에 둔다
+    # (기본값은 Retry 가 바깥이라, 재시도 1회 1회가 CB 실패로 누적되어 일시 장애에도 서킷이 열림)
+    circuitBreakerAspectOrder: 1
     instances:
       aiClient:
         # 슬라이딩 윈도우: 최근 10회 호출 기준으로 실패율 계산
@@ -178,6 +182,7 @@ resilience4j:
           - io.github.resilience4j.bulkhead.BulkheadFullException
 
   retry:
+    retryAspectOrder: 2
     instances:
       aiClient:
         # 원본 1회 + 재시도 2회 = 최대 3회 시도

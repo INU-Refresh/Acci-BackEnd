@@ -49,11 +49,13 @@ public class JpaAnalysisRepositoryAdapter implements AnalysisRepositoryPort {
     }
 
     @Override
+    @Transactional
     public boolean tryMarkRagInProgress(UUID analysisId) {
         return analysisRepository.tryMarkRagInProgress(analysisId) == 1;
     }
 
     @Override
+    @Transactional
     public void markRagDone(UUID analysisId) {
         int updated = analysisRepository.markRagDone(analysisId);
         if (updated == 0) {
@@ -62,6 +64,7 @@ public class JpaAnalysisRepositoryAdapter implements AnalysisRepositoryPort {
     }
 
     @Override
+    @Transactional
     public void markRagFailed(UUID analysisId) {
         int updated = analysisRepository.markRagFail(analysisId);
         if (updated == 0) {
@@ -70,6 +73,7 @@ public class JpaAnalysisRepositoryAdapter implements AnalysisRepositoryPort {
     }
 
     @Override
+    @Transactional
     public void markRagNone(UUID analysisId) {
         int updated = analysisRepository.markRagNone(analysisId);
         if (updated == 0) {
@@ -78,6 +82,7 @@ public class JpaAnalysisRepositoryAdapter implements AnalysisRepositoryPort {
     }
 
     @Override
+    @Transactional
     public void setAnalysisSummary(UUID analysisId, String accidentSituation, String accidentExplain) {
         int updated = analysisRepository.setAnalysisSummary(analysisId, accidentSituation, accidentExplain);
         if (updated == 0) {

@@ -61,7 +61,7 @@ public class GeminiGenerateClient {
                             return Mono.just(respBody);
                         })
                 )
-                .timeout(Duration.ofSeconds(30))
+                .timeout(Duration.ofSeconds(45))
                 .block();
 
         if (rawJson == null || rawJson.isBlank()) {

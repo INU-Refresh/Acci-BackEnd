@@ -1,0 +1,27 @@
+# Resilience4j "적용 전" 동작을 재현하는 설정 오버레이
+#
+# 코드(어노테이션)는 그대로 두고 설정만으로 각 패턴을 무력화 → 전/후 비교 시 나머지 조건을 완전히 동일하게 유지
+# 실행: ./gradlew bootRun --args='--spring.config.additional-location=file:load-test/config/application-before.yml'
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      aiClient:
+        # 모든 예외를 실패로 집계하지 않음 → 서킷이 절대 OPEN 되지 않음
+        ignoreExceptions:
+          - java.lang.Throwable
+        # 느린 호출 판정도 사실상 비활성화
+        slowCallDurationThreshold: 1h
+        slowCallRateThreshold: 100
+
+  retry:
+    instances:
+      aiClient:
+        # 원본 1회만 시도 (재시도 없음)
+        maxAttempts: 1
+
+  bulkhead:
+    instances:
+      aiClient:
+        # 동시 호출 제한 사실상 해제
+        maxConcurrentCalls: 1000

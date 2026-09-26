@@ -43,6 +43,20 @@ services:
     networks:
       - load-test
 
+  # 요청 단위 확률 장애(503) 주입용 가짜 AI 서버
+  # 재측정 시 toxiproxy upstream 을 fake-ai:8000 으로 등록 (AI_UPSTREAM=fake-ai:8000 ./load-test/toxiproxy/setup.sh)
+  fake-ai:
+    image: python:3.12-alpine
+    container_name: acci-fake-ai
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # 관리 API (/__chaos, /__stats)
+    volumes:
+      - ./load-test/fake-ai/server.py:/app/server.py:ro
+    command: ["python", "-u", "/app/server.py"]
+    networks:
+      - load-test
+
   # 로컬 앱 메트릭 수집용 Prometheus
   # host.docker.internal:8080 으로 로컬에서 실행 중인 앱을 스크랩
   prometheus-test:
